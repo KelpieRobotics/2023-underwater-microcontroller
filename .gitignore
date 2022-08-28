@@ -1,0 +1,10 @@
+# Doxygen
+html/
+latex/
+
+# MacOS 
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
