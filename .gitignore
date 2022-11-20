@@ -8,3 +8,10 @@ latex/
 .LSOverride
 ._*
 
+# STM32
+.metadata
+.settings
+[Rr]elease
+[Dd]ebug
+.launch
+
