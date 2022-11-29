@@ -14,5 +14,7 @@
 #define PRIVATE
 
 typedef uint16_t length_t;
+typedef float temperature_t;
+typedef float humidity_t;
 
 #endif /* USERUTILS_USERTYPES_H_ */

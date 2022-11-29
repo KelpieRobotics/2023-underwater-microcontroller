@@ -7,6 +7,6 @@
 
 #include "SafetyManagerModule.h"
 #include "LeakSensorDriver.h"
-#include "SHT20Driver.h"
+#include "SHT30DDriver.h"
 #include "PressureTransducerDriver.h"
 #include "PMBusDriver.h"

@@ -15,3 +15,6 @@ latex/
 [Dd]ebug
 .launch
 
+#IDE-specific
+.vscode
+.idea
