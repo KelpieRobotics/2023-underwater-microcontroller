@@ -25,7 +25,11 @@
  * Initalization of the serial peripheral is done in main.c
  * Auto generated init by the IOC file */
 
+PUBLIC void SerialDebugInit();
 PUBLIC void SerialPrint(const char * message, ...);
 PUBLIC void SerialPrintln(const char * message, ...);
+
+PUBLIC uint8_t GetNextSerialDebugChar();
+PUBLIC uint8_t IsSerialDebugEmpty();
 
 #endif /* USERDRIVERS_SERIALDEBUGDRIVER_H_ */
