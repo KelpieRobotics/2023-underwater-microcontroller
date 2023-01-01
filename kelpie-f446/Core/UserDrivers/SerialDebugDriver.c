@@ -54,13 +54,14 @@ PUBLIC void SerialPrintln(const char * message, ...)
 	va_end(args);
 }
 
+/* DO NOT USE, CONFLICTS WITH PI COMMS
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	SerialQueue_enqueue(&serialQueue, serial_rxBuffer[0]);
     HAL_UART_Receive_IT(&huart2, serial_rxBuffer, 1);
 
 }
-
+*/
 uint8_t GetNextSerialDebugChar()
 {
 	return SerialQueue_dequeue(&serialQueue);

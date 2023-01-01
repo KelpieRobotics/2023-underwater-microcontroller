@@ -14,15 +14,13 @@
 // Standard Lib
 #include <stdint.h>
 
-#define PUBLIC
-#define PRIVATE
+// Our APIs
+#include "UserTypes.h"
+
 #define REGISTER_HIGH_REPEATABILITY_MEASUREMENT_MSB 0x2C
 #define REGISTER_HIGH_REPEATABILITY_MEASUREMENT_LSB 0x06
 #define SENSOR_ADDRESS (0x44 << 1)
 #define SENSOR_TIMEOUT 500 // millis
-
-typedef float temperature_t;
-typedef float humidity_t;
 
 /*
  * @summary:

@@ -8,6 +8,8 @@
 #ifndef USERDRIVERS_IMUDRIVER_H_
 #define USERDRIVERS_IMUDRIVER_H_
 
+#include "UserTypes.h"
+
 
 
 #endif /* USERDRIVERS_IMUDRIVER_H_ */
