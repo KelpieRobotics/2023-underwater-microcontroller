@@ -18,6 +18,21 @@
 // STD headers
 #include <stdint.h>
 
+typedef enum{
+	TEMPERATURE =0,
+	HUMIDITY
+
+} SafetyEvents_t;
+
+typedef struct SafetyThresholds {
+	SafetyEvents_t eventName;
+	int32_t maxError;
+	int32_t maxWarning;
+	int32_t minError;
+	int32_t minWarning;
+
+} SafetyThresholds_t;
+
 PUBLIC void InitSafetyTask(void);
 PRIVATE void SafetyTask(void *argument);
 
