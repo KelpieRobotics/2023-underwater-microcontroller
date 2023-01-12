@@ -43,6 +43,7 @@ PRIVATE void MovementControlTask(void *argument)
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
 		DebugPrint("Movement Control Loop");
+		// debug testing here (temporary, driver should be moved to module)
 		SetThrusterPWM(THRUSTER1, 1000);
 		SetThrusterPWM(THRUSTER2, 1000);
 		SetThrusterPWM(THRUSTER3, 1000);
