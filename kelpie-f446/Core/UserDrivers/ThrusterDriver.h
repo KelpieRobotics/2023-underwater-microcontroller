@@ -10,15 +10,7 @@
 
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
-// PWM Counter registers
-#define THRUSTER1_REG TIM8->CCR1
-#define THRUSTER2_REG
-#define THRUSTER3_REG
-#define THRUSTER4_REG
-#define THRUSTER5_REG
-#define THRUSTER6_REG
-#define THRUSTER7_REG
-#define THRUSTER8_REG
+
 
 typedef enum {
 	THRUSTER1,
@@ -44,6 +36,7 @@ typedef struct
 	uint16_t counterValuePerPWM;
 	uint8_t timerChannel; // hardware define
 	TIM_HandleTypeDef * timerHandler;
+	volatile uint32_t * timerReg;
 
 
 } ThrusterInfo_t;

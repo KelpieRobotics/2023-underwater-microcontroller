@@ -7,6 +7,7 @@
 
 #include "MovementControlModule.h"
 #include "MovementControlTask.h"
+#include "ThrusterDriver.h"
 #include "SerialDebugDriver.h"
 
 // Function alias - replace with the driver api
@@ -42,5 +43,13 @@ PRIVATE void MovementControlTask(void *argument)
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
 		DebugPrint("Movement Control Loop");
+		SetThrusterPWM(THRUSTER1, 1000);
+		SetThrusterPWM(THRUSTER2, 1000);
+		SetThrusterPWM(THRUSTER3, 1000);
+		SetThrusterPWM(THRUSTER4, 1000);
+		SetThrusterPWM(THRUSTER5, 1000);
+		SetThrusterPWM(THRUSTER6, 1000);
+		SetThrusterPWM(THRUSTER7, 1000);
+		SetThrusterPWM(THRUSTER8, 1000);
 	}
 }
