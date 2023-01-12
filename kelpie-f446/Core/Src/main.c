@@ -151,15 +151,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
 
-  TIM1->CCR1 = STARTUP_PWM;
-  //TIM1->CCR2 = 40000;
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  TIM8->CCR1 = STARTUP_PWM;
-  //TIM1->CCR2 = 40000;
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-  TIM2->CCR1 = STARTUP_PWM;
-  //TIM1->CCR2 = 40000;
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   RunTaskManager();
   /* USER CODE END RTOS_THREADS */
 
