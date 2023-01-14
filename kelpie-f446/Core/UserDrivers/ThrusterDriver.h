@@ -33,7 +33,7 @@ typedef struct
 	pwm_t safeMinPWM; // safe range for operation
 	pwm_t safeMaxPWM;
 
-	uint16_t counterValuePerPWM;
+	double counterValuePerPWM;
 	uint8_t timerChannel; // hardware define
 	TIM_HandleTypeDef * timerHandler;
 	volatile uint32_t * timerReg;

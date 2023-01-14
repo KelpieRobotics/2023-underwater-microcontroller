@@ -13,7 +13,7 @@ static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 static uint8_t piComms_rxBuffer[32]; // Max of 32 bytes of data
 
 // Circular Queue
-#define QUEUE_MAX 32
+#define QUEUE_MAX 256
 typedef struct PiCommsQueue_t
 {
 	uint32_t head;

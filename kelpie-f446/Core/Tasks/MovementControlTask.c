@@ -45,12 +45,12 @@ PRIVATE void MovementControlTask(void *argument)
 		DebugPrint("Movement Control Loop");
 		// debug testing here (temporary, driver should be moved to module)
 		SetThrusterPWM(THRUSTER1, 1000);
-		SetThrusterPWM(THRUSTER2, 1000);
-		SetThrusterPWM(THRUSTER3, 1000);
-		SetThrusterPWM(THRUSTER4, 1000);
-		SetThrusterPWM(THRUSTER5, 1000);
-		SetThrusterPWM(THRUSTER6, 1000);
-		SetThrusterPWM(THRUSTER7, 1000);
-		SetThrusterPWM(THRUSTER8, 1000);
+		SetThrusterPWM(THRUSTER2, 1100);
+		SetThrusterPWM(THRUSTER3, 1200);
+		SetThrusterPWM(THRUSTER4, 1300);
+		SetThrusterPWM(THRUSTER5, 1400);
+		SetThrusterPWM(THRUSTER6, 1500);
+		SetThrusterPWM(THRUSTER7, 1600);
+		SetThrusterPWM(THRUSTER8, 1700);
 	}
 }
