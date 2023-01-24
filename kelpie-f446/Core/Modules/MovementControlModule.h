@@ -9,6 +9,9 @@
 #define MODULES_MOVEMENTCONTROLMODULE_H_
 
 #include "UserTypes.h"
+#include "ThrusterDriver.h"
 
+PUBLIC void SetPWMValue();
+PRIVATE void MapInputToPWM();
 
 #endif /* MODULES_MOVEMENTCONTROLMODULE_H_ */

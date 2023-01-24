@@ -10,7 +10,8 @@
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim8;
-ThrusterInfo_t thrusterLookup[8] =
+
+ThrusterInfo_t thrusterLookup[NUM_THRUSTERS] =
 {
 		// ID			ABS MIN		ABS MAX			ZERO		SAFE MIN	SAFE MAX 	COUNTER TO PWM VALUE	TIMER CHANNEL		TIMER HANDLER
 		{THRUSTER1, 		1000,		2000,		1500,		1250,		1750,			1/0.0381,				TIM_CHANNEL_1,			&htim8,			&(TIM8->CCR1)},
@@ -34,5 +35,8 @@ PUBLIC void SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm)
 // Motor initialization sequence
 PUBLIC void ThrusterDriverInit()
 {
-
+	uint8_t numThrusters = NUM_THRUSTERS;
+	while(numThrusters > 0){
+		SetThrusterPWM(numThrusters--, 1500);
+	}
 }

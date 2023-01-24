@@ -11,7 +11,7 @@
 #include "UserTypes.h"
 
 typedef struct ThrusterData_t{
-
+	uint8_t value;
 } ThrusterData_t;
 
 typedef struct ActuatorData_t{
@@ -27,7 +27,7 @@ typedef struct PMBusData_t{
 } PMBusData_t;
 
 typedef struct SystemData_t{
-	ThrusterData_t thrusterData;
+	ThrusterData_t *thrusterData;
 	ActuatorData_t actuatorData;
 	IMUData_t imuData;
 	temperature_t temperature;
@@ -37,6 +37,7 @@ typedef struct SystemData_t{
 
 } SystemData_t;
 
-void SetThrusterPower();
+void SetThrusterPower(uint8_t thruster, uint8_t value);
+uint8_t GetThrusterPower(uint8_t thrusterId);
 
 #endif /* MODULES_DATAAGGREGATIONMODULE_H_ */

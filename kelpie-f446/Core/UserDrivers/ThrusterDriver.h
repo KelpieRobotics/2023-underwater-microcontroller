@@ -11,6 +11,9 @@
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
 
+const uint8_t NUM_THRUSTERS = 8;
+const uint16_t THRUSTER_SAFE_MIN_VALUE = 1250;		//this many need to be updated if we are using different thrusters
+const uint16_t THRUSTER_SAFE_MAX_VALUE = 1750;
 
 typedef enum {
 	THRUSTER1,
