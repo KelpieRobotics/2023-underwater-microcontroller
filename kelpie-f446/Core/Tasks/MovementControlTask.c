@@ -56,7 +56,7 @@ PRIVATE void MovementControlTask(void *argument)
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;
 		while(thrusterID < NUM_THRUSTERS){
-			SetPWMValue(thrusterID, DA_GetThrusterPower(thrusterID));
+			SetThrusterPWM(thrusterID, DA_GetThrusterPower(thrusterID));
 			thrusterID++;
 		}
 	}
