@@ -37,6 +37,6 @@ PUBLIC void ThrusterDriverInit()
 {
 	uint8_t numThrusters = NUM_THRUSTERS;
 	while(numThrusters > 0){
-		SetThrusterPWM(numThrusters--, 1500);
+		SetThrusterPWM(numThrusters--, THRUSTER_INIT_VALUE);
 	}
 }

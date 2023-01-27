@@ -14,6 +14,7 @@
 const uint8_t NUM_THRUSTERS = 8;
 const uint16_t THRUSTER_SAFE_MIN_VALUE = 1250;		//this many need to be updated if we are using different thrusters
 const uint16_t THRUSTER_SAFE_MAX_VALUE = 1750;
+const uint16_t THRUSTER_INIT_VALUE = 1500;
 
 typedef enum {
 	THRUSTER1,

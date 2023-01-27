@@ -37,14 +37,16 @@ PUBLIC void InitMovementControlTask(void)
 }
 
 /*
- * checks the data aggregator for updates on the motor control
+ * initializes the motors, then checks the data aggregator for updates on the motor control
  */
 PRIVATE void MovementControlTask(void *argument)
 {
 	uint8_t thrusterID;
-
 	uint32_t cycleTick = osKernelGetTickCount();
+
 	DebugPrint("Movement Control Starting");
+	ThrusterDriverInit();
+
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
@@ -54,7 +56,7 @@ PRIVATE void MovementControlTask(void *argument)
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;
 		while(thrusterID < NUM_THRUSTERS){
-			SetPWMValue(thrusterID, GetThrusterPower(thrusterID));
+			SetPWMValue(thrusterID, DA_GetThrusterPower(thrusterID));
 			thrusterID++;
 		}
 	}

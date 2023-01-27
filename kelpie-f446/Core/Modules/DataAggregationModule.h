@@ -37,7 +37,7 @@ typedef struct SystemData_t{
 
 } SystemData_t;
 
-void SetThrusterPower(uint8_t thruster, uint8_t value);
-uint8_t GetThrusterPower(uint8_t thrusterId);
+void DA_SetThrusterValue(uint8_t thruster, uint8_t value);
+uint8_t DA_GetThrusterValue(uint8_t thrusterId);
 
 #endif /* MODULES_DATAAGGREGATIONMODULE_H_ */

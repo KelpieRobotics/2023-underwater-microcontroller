@@ -11,7 +11,7 @@
 #include "UserTypes.h"
 #include "ThrusterDriver.h"
 
-PUBLIC void SetPWMValue();
+PUBLIC void MCMod_SetThrusterValue();
 PRIVATE void MapInputToPWM();
 
 #endif /* MODULES_MOVEMENTCONTROLMODULE_H_ */
