@@ -2,12 +2,17 @@
  * AppendageActuationModule.h
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 
 #ifndef MODULES_APPENDAGEACTUATIONMODULE_H_
 #define MODULES_APPENDAGEACTUATIONMODULE_H_
 
-PUBLIC AAMod_SetAppendageValue(uint8_t appendageID, appendage_val appen_val);
+#include "UserTypes.h"
+#include "stm32f4xx_hal.h"
+#include "ServoDriver.h"
+
+PUBLIC void AAMod_SetAppendageValue(ServoID_t id, uint8_t input);
+PRIVATE pwm_t AAMod_MapInputToPWM(uint8_t id, uint8_t input);
 
 #endif /* MODULES_APPENDAGEACTUATIONMODULE_H_ */

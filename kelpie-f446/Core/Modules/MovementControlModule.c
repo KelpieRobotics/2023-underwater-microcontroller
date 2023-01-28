@@ -2,12 +2,13 @@
  * MovementControlModule.c
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 
-#include "DataAggregationModule.h"
 #include "MovementControlModule.h"
+#include "DataAggregationModule.h"
 #include "ThrusterDriver.h"
+#include "UserTypes.h"
 
 //this works as long as the motor uses THRUSTER_SAFE_MIN_VALUE as full reverse, THRUSTER_SAFE_MAX_VALUE as full forward, and their average as stationary
 const PWM_SCALE = (THRUSTER_SAFE_MAX_VALUE - THRUSTER_SAFE_MIN_VALUE) / (255);

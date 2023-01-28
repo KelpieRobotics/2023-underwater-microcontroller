@@ -2,7 +2,7 @@
  * MovementControlModule.h
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 
 #ifndef MODULES_MOVEMENTCONTROLMODULE_H_

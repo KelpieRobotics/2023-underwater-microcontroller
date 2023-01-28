@@ -15,7 +15,7 @@ typedef struct ThrusterData_t{
 } ThrusterData_t;
 
 typedef struct ActuatorData_t{
-	appendage_t value;
+	pwm_t value;
 } ActuatorData_t;
 
 typedef struct IMUData_t{
@@ -37,11 +37,11 @@ typedef struct SystemData_t{
 
 } SystemData_t;
 
-void DA_SetThrusterValue(uint8_t thruster, uint8_t value);
-uint8_t DA_GetThrusterValue(uint8_t thrusterId);
-void DA_SetAppendageValue(uint8_t appendage, appendage_t value);
-appendage_t DA_GetAppendageValue(uint8_t appendage);
 
+PUBLIC void DA_SetThrusterValue(uint8_t thrusterId, pwm_t value);
+PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId);
+PUBLIC void DA_SetAppendageValue(uint8_t appendageId, pwm_t value);
+PUBLIC pwm_t DA_GetAppendageValue(uint8_t appendageId);
 
 
 #endif /* MODULES_DATAAGGREGATIONMODULE_H_ */
