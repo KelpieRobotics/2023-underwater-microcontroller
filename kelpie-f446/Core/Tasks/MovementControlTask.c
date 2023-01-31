@@ -5,7 +5,6 @@
  *      Author: mingy
  */
 
-#include "MovementControlModule.h"
 #include "MovementControlTask.h"
 #include "ThrusterDriver.h"
 #include "SerialDebugDriver.h"

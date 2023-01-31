@@ -5,7 +5,6 @@
  *      Author: mingy
  */
 
-#include "AppendageActuationModule.h"
 #include "AppendageActuationTask.h"
 #include "DataAggregationModule.h"
 #include "ServoDriver.h"
@@ -45,26 +44,20 @@ PRIVATE void AppendageActuationTask(void *argument)
 	uint8_t servoID;
 	uint32_t cycleTick = osKernelGetTickCount();
 
-	DebugPrint("Movement Control Starting");
+	DebugPrint("Actuator Control Starting");
 	ServoDriverInit();
-	AAMod_SetAppendageValue(CLAW_CLOSE);
 
 	for(;;)
 	{
 		cycleTick += TIMER_APP_ACT_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Movement Control Loop");
+		DebugPrint("Actuator Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		servoID = 0;
-		while(servoID < NUMBER_SERVOS){
-			//SetServoAngle(servoID, DA_GetAppendageValue(servoID));
-//			SetServoAngle(servoID, DA_GetAppendageValue(servoID));
-			SetServoAngle(servoID, DA_GetAppendageValue(servoID));
-//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
 
-//			SetServoAngle(servoID, servoID);
+		while(servoID < NUMBER_SERVOS){
+			SetServoAngle(servoID, DA_GetAppendageState(servoID));
 			servoID++;
 		}
 
