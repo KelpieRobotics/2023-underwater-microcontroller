@@ -9,13 +9,14 @@
 #define MODULES_DATAAGGREGATIONMODULE_H_
 
 #include "UserTypes.h"
+#include "SerialDebugDriver.h"
 
 typedef struct ThrusterData_t{
 	pwm_t value;
 } ThrusterData_t;
 
 typedef struct ActuatorData_t{
-	pwm_t value;
+	GPIO_PinState state;
 } ActuatorData_t;
 
 typedef struct IMUData_t{
@@ -40,8 +41,8 @@ typedef struct SystemData_t{
 
 PUBLIC void DA_SetThrusterValue(uint8_t thrusterId, pwm_t value);
 PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId);
-PUBLIC void DA_SetAppendageValue(uint8_t appendageId, pwm_t value);
-PUBLIC pwm_t DA_GetAppendageValue(uint8_t appendageId);
+PUBLIC void DA_SetAppendageValue(uint8_t appendageId, GPIO_PinState value);
+PUBLIC GPIO_PinState DA_GetAppendageValue(uint8_t appendageId);
 
 
 #endif /* MODULES_DATAAGGREGATIONMODULE_H_ */

@@ -12,7 +12,12 @@
 #include "stm32f4xx_hal.h"
 #include "ServoDriver.h"
 
-PUBLIC void AAMod_SetAppendageValue(ServoID_t id, uint8_t input);
-PRIVATE pwm_t AAMod_MapInputToPWM(uint8_t id, uint8_t input);
+typedef enum {
+	CLAW_OPEN = -1,
+	CLAW_IDLE,
+	CLAW_CLOSE
+} claw_state_t;
+
+PUBLIC void AAMod_SetAppendageValue(claw_state_t state);
 
 #endif /* MODULES_APPENDAGEACTUATIONMODULE_H_ */

@@ -21,11 +21,11 @@ PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId){
 	return SystemData.thrusterData[thrusterId].value;
 }
 
-PUBLIC void DA_SetAppendageValue(uint8_t appendageId, pwm_t value){
-	SystemData.actuatorData[appendageId].value = value;
+PUBLIC void DA_SetAppendageValue(uint8_t appendageId, GPIO_PinState value){
+	SystemData.actuatorData[appendageId].state = value;
 }
 
-PUBLIC pwm_t DA_GetAppendageValue(uint8_t appendageId){
-	return SystemData.actuatorData[appendageId].value;
+PUBLIC GPIO_PinState DA_GetAppendageValue(uint8_t appendageId){
+	return SystemData.actuatorData[appendageId].state;
 }
 

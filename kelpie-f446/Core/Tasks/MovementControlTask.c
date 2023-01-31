@@ -9,6 +9,7 @@
 #include "MovementControlTask.h"
 #include "ThrusterDriver.h"
 #include "SerialDebugDriver.h"
+#include "DataAggregationModule.h"
 
 // Function alias - replace with the driver api
 #define DebugPrint(...) SerialPrintln(__VA_ARGS__)

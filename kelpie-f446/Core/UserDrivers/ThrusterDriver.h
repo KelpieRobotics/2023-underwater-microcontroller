@@ -12,9 +12,9 @@
 #include "stm32f4xx_hal.h"
 
 #define NUM_THRUSTERS 8
-const pwm_t THRUSTER_SAFE_MIN_VALUE = 1250;		//this many need to be updated if we are using different thrusters
-const pwm_t THRUSTER_SAFE_MAX_VALUE = 1750;
-const pwm_t THRUSTER_INIT_VALUE = 1500;
+#define THRUSTER_SAFE_MIN_VALUE 1250		//this many need to be updated if we are using different thrusters
+#define THRUSTER_SAFE_MAX_VALUE 1750
+#define THRUSTER_INIT_VALUE 1500
 
 typedef enum {
 	THRUSTER1,

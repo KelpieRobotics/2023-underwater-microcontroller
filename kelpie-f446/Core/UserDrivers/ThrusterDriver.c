@@ -8,7 +8,6 @@
 #include "ThrusterDriver.h"
 #include "SerialDebugDriver.h"
 extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim8;
 
 ThrusterInfo_t thrusterLookup[NUM_THRUSTERS] =
@@ -42,7 +41,7 @@ PUBLIC result_t ThrusterDriverInit()
 	result_t ret = RESULT_OK;
 
 	while(numThrusters > 0){
-		if(SetThrusterPWM(numThrusters--, THRUSTER_INIT_VALUE) != HAL_OK){
+		if(SetThrusterPWM(numThrusters--, THRUSTER_INIT_VALUE) != RESULT_OK){
 			ret = RESULT_ERR;
 		}
 	}
