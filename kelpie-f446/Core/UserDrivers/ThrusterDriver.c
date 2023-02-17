@@ -7,7 +7,6 @@
 
 #include "ThrusterDriver.h"
 #include "SerialDebugDriver.h"
-#include "DataAggregationModule.h"
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim8;
 
@@ -43,10 +42,13 @@ PUBLIC result_t ThrusterDriverInit()
 
 	while(numThrusters > 0){
 		numThrusters--;
-		DA_SetThrusterValue(numThrusters, THRUSTER_INIT_VALUE);
 		if(SetThrusterPWM(numThrusters, THRUSTER_INIT_VALUE) != RESULT_OK){
 			ret = RESULT_ERR;
 		}
 	}
 	return ret;
+}
+
+PUBLIC pwm_t GetThrusterInitValue(){
+	return THRUSTER_INIT_VALUE;
 }

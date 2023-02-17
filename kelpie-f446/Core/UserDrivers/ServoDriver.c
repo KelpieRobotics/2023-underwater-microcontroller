@@ -30,11 +30,7 @@ const ServoInfo_t servoLookup[NUMBER_SERVOS] =
 PUBLIC void SetServoAngle(ServoID_t servoID, GPIO_PinState state){
 	SerialPrintln("Pin State: %d", state);
 
-	//HAL_GPIO_WritePin(servoLookup[servoID].GPIO_Bank, servoLookup[servoID].GPIO_Pin, state);
-
 	HAL_GPIO_WritePin(servoLookup[servoID].GPIO_Bank, servoLookup[servoID].GPIO_Pin, state);
-
-	//HAL_GPIO_WritePin(GPIOB, servoLookup[servoID].GPIO_Pin, state);
 }
 
 
