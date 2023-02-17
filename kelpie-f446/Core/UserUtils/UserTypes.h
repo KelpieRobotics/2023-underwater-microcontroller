@@ -19,7 +19,6 @@ typedef float humidity_t;
 typedef float pressure_t;
 typedef uint16_t angular_degrees_t;
 typedef uint16_t pwm_t;
-typedef uint16_t appendage_t;
 
 typedef enum {
     RESULT_OK = 0,
