@@ -2,7 +2,7 @@
  * ThrusterDriver.h
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 
 #ifndef USERDRIVERS_THRUSTERDRIVER_H_
@@ -11,6 +11,10 @@
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
 
+#define NUM_THRUSTERS 8
+#define THRUSTER_SAFE_MIN_VALUE 1250		//this many need to be updated if we are using different thrusters
+#define THRUSTER_SAFE_MAX_VALUE 1750
+#define THRUSTER_INIT_VALUE 1500
 
 typedef enum {
 	THRUSTER1,
@@ -41,7 +45,7 @@ typedef struct
 
 } ThrusterInfo_t;
 
-PUBLIC void ThrusterDriverInit();
-PUBLIC void SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm);
+PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm);
+PUBLIC result_t ThrusterDriverInit();
 
 #endif /* USERDRIVERS_THRUSTERDRIVER_H_ */
