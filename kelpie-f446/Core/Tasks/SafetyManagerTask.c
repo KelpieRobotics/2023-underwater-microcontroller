@@ -8,7 +8,6 @@
 #include "SafetyManagerModule.h"
 #include "SafetyManagerTask.h"
 #include "SerialDebugDriver.h"
-#include "LeakSensorDriver.h"
 
 // Function alias - replace with the driver api
 #define DebugPrint(...) SerialPrintln(__VA_ARGS__)
@@ -40,14 +39,11 @@ PRIVATE void SafetyTask(void *argument)
 	uint32_t cycleTick = osKernelGetTickCount();
 	DebugPrint("safety");
 
-	InitLeakSensor();
-
 	for(;;)
 	{
 		cycleTick += TIMER_SAFETY_TASK;
 		osDelayUntil(cycleTick);
 		DebugPrint("safety loop");
-
 
 	}
 }
