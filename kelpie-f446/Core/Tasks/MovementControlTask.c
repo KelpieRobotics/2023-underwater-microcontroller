@@ -50,7 +50,7 @@ PRIVATE void MovementControlTask(void *argument)
 	while(thrusterID < NUM_THRUSTERS){
 		DA_SetThrusterValue(thrusterID++, GetThrusterInitValue());
 	}
-
+  
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
