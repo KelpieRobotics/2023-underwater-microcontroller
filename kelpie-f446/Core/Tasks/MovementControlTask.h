@@ -1,4 +1,3 @@
-
 /*
  * MovementControlTask.h
  *
@@ -18,7 +17,6 @@
 
 // STD headers
 #include <stdint.h>
-
 
 PUBLIC void InitMovementControlTask(void);
 PRIVATE void MovementControlTask(void *argument);
