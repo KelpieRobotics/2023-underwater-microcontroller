@@ -41,12 +41,16 @@ PUBLIC void InitMovementControlTask(void)
  */
 PRIVATE void MovementControlTask(void *argument)
 {
-	uint8_t thrusterID;
+	uint8_t thrusterID = 0;
 	uint32_t cycleTick = osKernelGetTickCount();
 
 	DebugPrint("Movement Control Starting");
 	ThrusterDriverInit();
 
+	while(thrusterID < NUM_THRUSTERS){
+		DA_SetThrusterValue(thrusterID++, GetThrusterInitValue());
+	}
+  
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;

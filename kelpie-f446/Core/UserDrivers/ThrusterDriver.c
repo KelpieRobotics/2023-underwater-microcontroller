@@ -40,13 +40,15 @@ PUBLIC result_t ThrusterDriverInit()
 {
 	uint8_t numThrusters = NUM_THRUSTERS;
 	result_t ret = RESULT_OK;
-
 	while(numThrusters > 0){
 		numThrusters--;
-		DA_SetThrusterValue(numThrusters, THRUSTER_INIT_VALUE);
 		if(SetThrusterPWM(numThrusters, THRUSTER_INIT_VALUE) != RESULT_OK){
 			ret = RESULT_ERR;
 		}
 	}
 	return ret;
+}
+
+PUBLIC pwm_t GetThrusterInitValue(){
+	return THRUSTER_INIT_VALUE;
 }
