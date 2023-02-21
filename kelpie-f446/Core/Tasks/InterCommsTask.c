@@ -36,7 +36,8 @@ PRIVATE void InternalCommsTask(void *argument)
 {
 	uint32_t cycleTick = osKernelGetTickCount();
 	DebugPrint("icomms");
-	PiComms_Init(); // move this to the module, temporarily here for testing
+	InitInternalCommsModule();
+
 	for(;;)
 	{
 		cycleTick += TIMER_INTERNAL_COMMS_TASK;
