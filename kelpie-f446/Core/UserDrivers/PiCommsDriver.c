@@ -6,11 +6,13 @@
  */
 
 #include "PiCommsDriver.h"
+#include "SerialDebugDriver.h"
 
 extern UART_HandleTypeDef huart4;
 static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
 static uint8_t piComms_rxBuffer[32]; // Max of 32 bytes of data
+uint8_t i;
 
 // Circular Queue
 #define QUEUE_MAX 256
@@ -23,6 +25,7 @@ typedef struct PiCommsQueue_t
 }PiCommsQueue_t;
 
 PiCommsQueue_t piCommsQueue;
+
 
 PRIVATE void PiCommsQueue_init(PiCommsQueue_t * q);
 PRIVATE uint8_t PiCommsQueue_dequeue(PiCommsQueue_t * q);
@@ -43,10 +46,30 @@ PUBLIC void PiComms_Send(const char * message, ...)
 
 }
 
+/*
+ * if # clear buffer
+ * if ! enqueue to queue
+ * else add to buffer
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	PiCommsQueue_enqueue(&piCommsQueue, piComms_rxBuffer[0]);
-    HAL_UART_Receive_IT(&huart4, piComms_rxBuffer, 1);
+	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer, 1);
+	SerialPrintln("HAL_UART_RxCpltCallback: %s", piComms_rxBuffer);
+
+//	char currentChar = 'x';
+//	switch (currentChar){
+//		case '#':
+//			i = 0;
+//			memset(piComms_rxBuffer, '\0', sizeof(piComms_rxBuffer));
+//			break;
+//		case '!':
+//			PiCommsQueue_enqueue(&piCommsQueue, piComms_rxBuffer[0]);
+//			break;
+//		default:
+//			piComms_rxBuffer[i++] = (uint8_t)currentChar;
+//			break;
+//	}
 
 }
 

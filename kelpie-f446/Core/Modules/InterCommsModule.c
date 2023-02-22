@@ -79,6 +79,10 @@ PUBLIC void InitInternalCommsModule(){
 	SortICommsMsg(msgIndexMap, 0, NUM_MESSAGES-1);
 }
 
+/*
+ * check message queue
+ * check message ID
+*/
 PUBLIC result_t InternalCommsMessageCallback(uint8_t msgId, uint8_t dataLen, void *data){
 	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msgId);
 	if(msgIndex < 0){
