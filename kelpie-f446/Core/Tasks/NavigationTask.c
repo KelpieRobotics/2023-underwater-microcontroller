@@ -37,6 +37,6 @@ PRIVATE void NavigationTask(void *argument)
 	{
 		cycleTick += TIMER_NAV_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Navigation Task Loop");
+		//DebugPrint("Navigation Task Loop");
 	}
 }

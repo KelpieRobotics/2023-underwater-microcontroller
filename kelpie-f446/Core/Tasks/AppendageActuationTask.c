@@ -51,7 +51,7 @@ PRIVATE void AppendageActuationTask(void *argument)
 	{
 		cycleTick += TIMER_APP_ACT_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Actuator Control Loop");
+		//DebugPrint("Actuator Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		servoID = 0;

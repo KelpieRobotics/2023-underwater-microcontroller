@@ -8,10 +8,15 @@
 #include "PiCommsDriver.h"
 #include "SerialDebugDriver.h"
 
+#include "stdlib.h"
+
 extern UART_HandleTypeDef huart4;
 static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
-static uint8_t piComms_rxBuffer[32]; // Max of 32 bytes of data
+
+#define RX_BUFFER_SIZE 32
+static uint8_t *piComms_rxBuffer; // Max of 32 bytes of data
+static uint8_t *piComms_rxBuffer_index;
 uint8_t i;
 
 // Circular Queue
@@ -32,7 +37,8 @@ PRIVATE uint8_t PiCommsQueue_dequeue(PiCommsQueue_t * q);
 PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, uint8_t value);
 
 PUBLIC void PiComms_Init(){
-	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer, 1);
+	piComms_rxBuffer_index = piComms_rxBuffer = calloc(RX_BUFFER_SIZE, sizeof(uint8_t));
+	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
 	PiCommsQueue_init(&piCommsQueue);
 }
 
@@ -53,24 +59,34 @@ PUBLIC void PiComms_Send(const char * message, ...)
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	PiCommsQueue_enqueue(&piCommsQueue, piComms_rxBuffer[0]);
-	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer, 1);
-	SerialPrintln("HAL_UART_RxCpltCallback: %s", piComms_rxBuffer);
+	//SerialPrintln("HAL_UART_RxCpltCallback: %d", piComms_rxBuffer-tempB);
+	if(piComms_rxBuffer_index - piComms_rxBuffer > RX_BUFFER_SIZE){
+		SerialPrintln("HAL_UART_RxCpltCallback BUFFER FULL");
+		if(piComms_rxBuffer_index[0] != '!'){
+			HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
+			return;
+		}
+	}
 
-//	char currentChar = 'x';
-//	switch (currentChar){
-//		case '#':
-//			i = 0;
-//			memset(piComms_rxBuffer, '\0', sizeof(piComms_rxBuffer));
-//			break;
-//		case '!':
-//			PiCommsQueue_enqueue(&piCommsQueue, piComms_rxBuffer[0]);
-//			break;
-//		default:
-//			piComms_rxBuffer[i++] = (uint8_t)currentChar;
-//			break;
-//	}
+	switch (piComms_rxBuffer_index[0]){
+		case '#':
+			SerialPrintln("HAL_UART_RxCpltCallback Start Transmission");
+			break;
+		case '!':
+			SerialPrintln("HAL_UART_RxCpltCallback enqueue message: %s", piComms_rxBuffer);
+			piComms_rxBuffer_index = piComms_rxBuffer;
+			memset(piComms_rxBuffer, '\0', RX_BUFFER_SIZE * sizeof(uint8_t));
+			break;
+		case '\r':
+			SerialPrintln("HAL_UART_RxCpltCallback \\r");
+			break;
+		default:
+			SerialPrintln("HAL_UART_RxCpltCallback add char: %c", piComms_rxBuffer_index[0]);
+			piComms_rxBuffer_index++;
+			break;
+	}
 
+	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
 }
 
 uint8_t PiComms_GetNextChar()

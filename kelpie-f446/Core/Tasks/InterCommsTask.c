@@ -9,6 +9,9 @@
 #include "SerialDebugDriver.h"
 #include "PiCommsDriver.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 // Function alias - replace with the driver api
 #define DebugPrint(...) SerialPrintln(__VA_ARGS__)
 
@@ -38,12 +41,19 @@ PRIVATE void InternalCommsTask(void *argument)
 	DebugPrint("icomms");
 	InitInternalCommsModule();
 
+	uint8_t *data = malloc(sizeof(uint8_t));
+	*data = 8;
+
 	for(;;)
 	{
 		cycleTick += TIMER_INTERNAL_COMMS_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("icomms loop");
+		//DebugPrint("icomms loop");
 
+		//SerialPrintln("InternalCommsTask: %d", *data);
+		//InternalCommsMessageCallback(4, 8, data);
+
+		PiComms_Send("\tMessage sent");
 
 		// pi comms demo code, temporary
 		char temp[32] = {'-'};

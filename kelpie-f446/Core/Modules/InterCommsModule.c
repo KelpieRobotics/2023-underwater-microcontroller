@@ -99,7 +99,7 @@ PUBLIC result_t InternalCommsMessageCallback(uint8_t msgId, uint8_t dataLen, voi
 }
 
 void TestCallback1(void *data){
-	SerialPrintln("TestCallback1");
+	SerialPrintln("TestCallback1: %d", *(uint8_t*)data);
 }
 void TestCallback2(void *data){
 	SerialPrintln("TestCallback2");

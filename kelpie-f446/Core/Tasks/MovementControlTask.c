@@ -55,7 +55,7 @@ PRIVATE void MovementControlTask(void *argument)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Movement Control Loop");
+		//DebugPrint("Movement Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;
