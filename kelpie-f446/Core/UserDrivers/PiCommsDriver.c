@@ -81,14 +81,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			piComms_rxBuffer_index[0] = '\0';	//revert last char so it isn't sent forward
 
 			uint8_t rxLen = piComms_rxBuffer_index - piComms_rxBuffer;
-			if(rxLen < MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE){		//handle incomplete transmissions
-				SerialPrintln("HAL_UART_RxCpltCallback rx buffer message missing information, message: %s, len: %d",piComms_rxBuffer, rxLen);
-				break;
+			if(rxLen >= MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE){				//only enqueue if it won't cause data parsing errors
+				PiCommsQueue_enqueue(&piCommsQueue, PiComms_rxBufferToMessage());	//convert rx buffer to message and enqueue in message queue
 			}
 
-			SerialPrintln("HAL_UART_RxCpltCallback enqueue message: %s", piComms_rxBuffer);
+			SerialPrintln("HAL_UART_RxCpltCallback enqueue message: %s", piComms_rxBuffer);	//NOT FINAL: WILL REMAIN UP UNTIL SPINE IS MERGED
 			piComms_rxBuffer_index = piComms_rxBuffer;							//reset piComms_rxBuffer
-			PiCommsQueue_enqueue(&piCommsQueue, PiComms_rxBufferToMessage());	//convert rx buffer to message and enqueue in message queue
 			memset(piComms_rxBuffer, '\0', rxLen * sizeof(uint8_t));	//clear rx buffer
 			break;
 		case '\r':
