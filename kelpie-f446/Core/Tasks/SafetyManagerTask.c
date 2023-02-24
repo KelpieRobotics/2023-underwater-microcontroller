@@ -43,7 +43,7 @@ PRIVATE void SafetyTask(void *argument)
 	{
 		cycleTick += TIMER_SAFETY_TASK;
 		osDelayUntil(cycleTick);
-		//DebugPrint("safety loop");
+		DebugPrint("safety loop");
 
 	}
 }

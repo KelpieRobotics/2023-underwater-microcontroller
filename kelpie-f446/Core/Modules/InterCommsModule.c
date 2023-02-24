@@ -26,11 +26,10 @@ Data struct in module layer: msgID, dataLen, callbackForHowItShouldBeHandled
 */
 
 
-
+//NOT FINAL: USED FOR TESTING
 void TestCallback1();
 void TestCallback2();
 void TestCallback3();
-void TestCallback4();
 
 struct indexMap{
 	uint8_t id, index;
@@ -41,27 +40,27 @@ PRIVATE void swap(struct indexMap *a, struct indexMap *b);
 PRIVATE int partition(struct indexMap array[], int low, int high);
 PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high);
 
-struct indexMap *msgIndexMap;
 
 #define NUM_MESSAGES 4
 
+struct indexMap msgIndexMap[NUM_MESSAGES];
 ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
 {
-		// ID
-		{4, 8, &TestCallback1},
-		{6, 8, &TestCallback2},
-		{33, 8, &TestCallback3},
-		{1, 8, &TestCallback4}
+		//ID,	bytes,	callback
+		{4, 	2, 		&TestCallback1},
+		{6, 	4, 		&TestCallback2},
+		{33, 	3, 		&TestCallback3},
 };
 
+//setup mapping message ids to msgCallbackLookup indexes
 PRIVATE void MakeInternalCommsMapping(){
-	msgIndexMap = malloc(sizeof(struct indexMap) * NUM_MESSAGES);
 	for(uint8_t i = 0; i < NUM_MESSAGES; i++){
 		msgIndexMap[i].id = msgCallbackLookup[i].msgId;
 		msgIndexMap[i].index = i;
 	}
 }
 
+//binary search for message by id
 PRIVATE int8_t binSearch(struct indexMap arr[], uint8_t l, uint8_t r, uint8_t msgId)
 {
     if (r >= l) {
@@ -79,45 +78,49 @@ PUBLIC void InitInternalCommsModule(){
 	SortICommsMsg(msgIndexMap, 0, NUM_MESSAGES-1);
 }
 
-/*
- * check message queue
- * check message ID
-*/
-PUBLIC result_t InternalCommsMessageCallback(uint8_t msgId, uint8_t dataLen, void *data){
-	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msgId);
+//calls message id's callback and passes in data
+PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
+	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msg.messageId);
 	if(msgIndex < 0){
-		SerialPrintln("InternalComms msgId %d not found", msgId);
+		SerialPrintln("InternalComms msgId %d not found", msg.messageId);
 		return RESULT_ERR;
 	}
-	if(msgCallbackLookup[msgIndex].dataLen != dataLen){
-		SerialPrintln("InternalComms dataLen incorrect length. Given %d, Expected %d", dataLen, msgCallbackLookup[msgIndex].dataLen);
+	if(msgCallbackLookup[msgIndex].dataLen != msg.dataLen){
+		SerialPrintln("InternalComms message dataLen incorrect length. Given %d, Expected %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen);
 		return RESULT_ERR;
 	}
 
-	msgCallbackLookup[msgIndex].callback(data);
+	msgCallbackLookup[msgIndex].callback(msg.data);
 	return RESULT_OK;
 }
 
+// data length = 2 * sizeof(char)
 void TestCallback1(void *data){
-	SerialPrintln("TestCallback1: %d", *(uint8_t*)data);
+	char * localData = (char*)data;
+	SerialPrintln("TestCallback1: %c%c",localData[0],localData[1]);
 }
+
+// data length = 2 * sizeof(uint16_t) = 4 * sizeof(char)
 void TestCallback2(void *data){
-	SerialPrintln("TestCallback2");
+	uint16_t * localData = (uint16_t*)data;
+	SerialPrintln("TestCallback2: %d%d",localData[0],localData[1]);
 }
+
+// data length = 3 * sizeof(uint8_t)
 void TestCallback3(void *data){
-	SerialPrintln("TestCallback3");
-}
-void TestCallback4(void *data){
-	SerialPrintln("TestCallback4");
+	uint8_t * localData = (uint8_t*)data;
+	SerialPrintln("TestCallback3: %d%d%d",localData[0],localData[1],localData[2]);
 }
 
 
+
+//FOR SORT SortICommsMsg
 PRIVATE void swap(struct indexMap *a, struct indexMap *b) {
 	struct indexMap t = *a;
   *a = *b;
   *b = t;
 }
-
+//FOR SORT SortICommsMsg
 PRIVATE int partition(struct indexMap array[], int low, int high) {
   int pivot = array[high].id;
   int i = (low - 1);
@@ -131,7 +134,7 @@ PRIVATE int partition(struct indexMap array[], int low, int high) {
   swap(&array[i + 1], &array[high]);
   return (i + 1);
 }
-
+//FOR SORT SortICommsMsg
 PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high) {
   if (low < high) {
     int pi = partition(array, low, high);

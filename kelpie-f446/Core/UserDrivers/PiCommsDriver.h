@@ -11,6 +11,7 @@
 
 // STM headers
 #include "stm32f4xx_hal.h"
+#include "UserTypes.h"
 
 // Standard Lib
 #include <string.h>
@@ -28,8 +29,8 @@
 
 PUBLIC void PiComms_Init();
 PUBLIC void PiComms_Send(const char * message, ...);
-
-PUBLIC uint8_t PiComms_GetNextChar();
 PUBLIC uint8_t PiComms_IsEmpty();
+PiCommsMessage_t PiComms_GetNext();
+
 
 #endif /* USERDRIVERS_PICOMMSDRIVER_H_ */

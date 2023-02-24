@@ -20,6 +20,13 @@ typedef float pressure_t;
 typedef uint16_t angular_degrees_t;
 typedef uint16_t pwm_t;
 
+typedef struct PiCommsMessage_t
+{
+	uint32_t messageId;
+	uint32_t dataLen;
+	void *data;
+}PiCommsMessage_t;
+
 typedef enum {
     RESULT_OK = 0,
     RESULT_ERR = 1,

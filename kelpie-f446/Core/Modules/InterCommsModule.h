@@ -19,7 +19,7 @@ typedef struct ICommsMsg_t{
 } ICommsMsg_t;
 
 PUBLIC void InitInternalCommsModule();
-PUBLIC result_t InternalCommsMessageCallback(uint8_t msgId, uint8_t dataLen, void *data);
+PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg);
 
 #endif /* MODULES_INTERCOMMSMODULE_H_ */
 
