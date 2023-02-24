@@ -2,7 +2,7 @@
  * InterCommsModule.c
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 
 //#include "PiCommsDriver.h"
@@ -15,22 +15,6 @@
 #include <stdint.h>
 #include "UserTypes.h"
 
-/*
-check message queue
-check message ID
-do binary search for msgID in Data struct in module layer (see below)
-call callback
-//may want helper function that dbl checks dataLen (report error to serial terminal (debug print))
-
-Data struct in module layer: msgID, dataLen, callbackForHowItShouldBeHandled
-*/
-
-
-//NOT FINAL: USED FOR TESTING
-void TestCallback1();
-void TestCallback2();
-void TestCallback3();
-
 struct indexMap{
 	uint8_t id, index;
 };
@@ -41,12 +25,16 @@ PRIVATE int partition(struct indexMap array[], int low, int high);
 PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high);
 
 
+void TestCallback1();		//NOT FINAL: USED FOR TESTING
+void TestCallback2();
+void TestCallback3();
+
 #define NUM_MESSAGES 4
 
 struct indexMap msgIndexMap[NUM_MESSAGES];
 ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
 {
-		//ID,	bytes,	callback
+		//ID,	bytes,	callback				//UPDATE NUM_MESSAGES WHEN CALLBACKS ARE ADDED
 		{4, 	2, 		&TestCallback1},
 		{6, 	4, 		&TestCallback2},
 		{33, 	3, 		&TestCallback3},

@@ -2,7 +2,7 @@
  * InterCommsTask.c
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 #include "InterCommsTask.h"
 #include "InterCommsModule.h"
@@ -55,7 +55,7 @@ PRIVATE void InternalCommsTask(void *argument)
 		while(!PiComms_IsEmpty())			//for each message, call it's callback method
 		{
 			msg = PiComms_GetNext();
-			InternalCommsMessageCallback(msg);
+			if(InternalCommsMessageCallback(msg) == RESULT_ERR) DebugPrint("#ERR: InternalCommsTask message callback failed");
 			free(msg.data);						//free msg.data that is allocated in driver
 		}
 	}
