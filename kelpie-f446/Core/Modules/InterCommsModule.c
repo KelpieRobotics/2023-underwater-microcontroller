@@ -29,7 +29,7 @@ void TestCallback1();		//NOT FINAL: USED FOR TESTING
 void TestCallback2();
 void TestCallback3();
 
-#define NUM_MESSAGES 4
+#define NUM_MESSAGES 3
 
 struct indexMap msgIndexMap[NUM_MESSAGES];
 ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
@@ -70,11 +70,11 @@ PUBLIC void InitInternalCommsModule(){
 PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
 	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msg.messageId);
 	if(msgIndex < 0){
-		SerialPrintln("InternalComms msgId %d not found", msg.messageId);
+		SerialPrintln("#ERR: InternalComms msgId %d not found", msg.messageId);
 		return RESULT_ERR;
 	}
 	if(msgCallbackLookup[msgIndex].dataLen != msg.dataLen){
-		SerialPrintln("InternalComms message dataLen incorrect length. Given %d, Expected %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen);
+		SerialPrintln("#ERR: InternalCommsMessageCallback message dataLen incorrect length. Given %d, Expected %d, msgIndex: %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen, msgIndex);
 		return RESULT_ERR;
 	}
 

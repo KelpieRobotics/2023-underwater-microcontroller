@@ -19,7 +19,7 @@ static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 #define MESSAGE_ID_BASE 16		//base of message ID and length are hex
 
 #define RX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
-static uint8_t *piComms_rxBuffer; 			//pointer to buffer that holds incoming transmissions
+static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
 
 
@@ -42,7 +42,7 @@ PRIVATE PiCommsMessage_t PiCommsQueue_dequeue(PiCommsQueue_t * q);
 PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, PiCommsMessage_t value);
 
 PUBLIC void PiComms_Init(){
-	piComms_rxBuffer_index = piComms_rxBuffer = calloc(RX_BUFFER_SIZE, sizeof(uint8_t));
+	piComms_rxBuffer_index = piComms_rxBuffer;
 
 	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
 	PiCommsQueue_init(&piCommsQueue);
@@ -75,6 +75,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	switch (piComms_rxBuffer_index[0]){
 		case '#':
+			piComms_rxBuffer_index[0] = '\0';	//revert last char so it isn't sent forward
 			break;
 		case '!':
 			piComms_rxBuffer_index[0] = '\0';	//revert last char so it isn't sent forward
@@ -88,6 +89,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			piComms_rxBuffer_index = piComms_rxBuffer;							//reset piComms_rxBuffer
 			memset(piComms_rxBuffer, '\0', rxLen * sizeof(uint8_t));	//clear rx buffer
 			break;
+//		case '\r':		//THIS IS NEEDED FOR DEBUGGING IF \r CHARACTER IS SENT AS PART OF MESSAGE
+//			break;
 		default:
 			piComms_rxBuffer_index++;
 			break;

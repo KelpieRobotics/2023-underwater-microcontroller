@@ -13,8 +13,8 @@
 #include "UserTypes.h"
 
 typedef struct ICommsMsg_t{
-	uint8_t msgId;
-	uint8_t dataLen;
+	uint16_t msgId;
+	uint16_t dataLen;
 	void (*callback)();
 } ICommsMsg_t;
 
