@@ -8,9 +8,7 @@
 #include "LeakSensorDriver.h"
 #include "SerialDebugDriver.h"
  #include "InteruptModule.h"
-
-#define PIN_NUM 13
-const uint16_t GPIO_Pin = GPIO_PIN_13;
+ #include "main.h"
 
 
 PRIVATE void LeakSensorIntCallback(){
@@ -19,13 +17,8 @@ PRIVATE void LeakSensorIntCallback(){
 }
 
 PUBLIC result_t InitLeakSensor(){
-//	InteruptRegisterCallback();
-//	if(HAL_GPIO_ReadPin(GPIOB, GPIO_Pin) == GPIO_PIN_RESET){
-//		LeakSensorIntCallback();
-//		return RESULT_ERR;
-//	}
-//	return RESULT_OK;
-
-	InteruptRegisterCallback(PIN_NUM, LeakSensorIntCallback);
+	int8_t pinId = GetPinInteruptLookUpIndex(LEAK_EXTI_Pin);
+	if(pinId < 0) return RESULT_ERR;
+	InteruptRegisterCallback(pinId, LeakSensorIntCallback);
 	return RESULT_OK;
 }

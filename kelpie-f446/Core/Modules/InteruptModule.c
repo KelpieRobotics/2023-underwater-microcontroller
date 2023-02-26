@@ -13,6 +13,8 @@
 
 const char ITM_TAG[] = "#ITM:";
 
+uint16_t GPIO_PIN_ARRAY[] = {GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_2, GPIO_PIN_3, GPIO_PIN_4, GPIO_PIN_5, GPIO_PIN_6, GPIO_PIN_7, GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12, GPIO_PIN_13, GPIO_PIN_14, GPIO_PIN_15};
+
 /*********************************************************************************
  *
  * 		Look up table for Interupts and their callbacks
@@ -60,6 +62,21 @@ PRIVATE void InteruptTriggerCallback(InteruptLookUpIndex id) {
 	interuptLookUpTable[id].callback();
 }
 
+PRIVATE int8_t binSearch(uint16_t arr[], int8_t l, int8_t r, uint16_t pin)
+{
+	if (r >= l) {
+		int8_t mid = l + ((r - l)>>1);
+		if (arr[mid] == pin) return mid;
+		if (arr[mid] > pin) return binSearch(arr, l, mid - 1, pin);
+		return binSearch(arr, mid + 1, r, pin);
+	}
+	return -1;
+}
+
+PUBLIC int8_t GetPinInteruptLookUpIndex(uint16_t pin){
+	return binSearch(GPIO_PIN_ARRAY, 0, NUMBER_INTERUPT_IDS, pin);
+}
+
 /*********************************************************************************
  *
  * 		STM32 Interupt Callback
@@ -68,57 +85,10 @@ PRIVATE void InteruptTriggerCallback(InteruptLookUpIndex id) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	switch (GPIO_Pin) {
-		case GPIO_PIN_0:
-			InteruptTriggerCallback(INTERUPT_GPIO_0_ID);
-			return;
-		case GPIO_PIN_1:
-			InteruptTriggerCallback(INTERUPT_GPIO_1_ID);
-			return;
-		case GPIO_PIN_2:
-			InteruptTriggerCallback(INTERUPT_GPIO_2_ID);
-			return;
-		case GPIO_PIN_3:
-			InteruptTriggerCallback(INTERUPT_GPIO_3_ID);
-			return;
-		case GPIO_PIN_4:
-			InteruptTriggerCallback(INTERUPT_GPIO_4_ID);
-			return;
-		case GPIO_PIN_5:
-			InteruptTriggerCallback(INTERUPT_GPIO_5_ID);
-			return;
-		case GPIO_PIN_6:
-			InteruptTriggerCallback(INTERUPT_GPIO_6_ID);
-			return;
-		case GPIO_PIN_7:
-			InteruptTriggerCallback(INTERUPT_GPIO_7_ID);
-			return;
-		case GPIO_PIN_8:
-			InteruptTriggerCallback(INTERUPT_GPIO_8_ID);
-			return;
-		case GPIO_PIN_9:
-			InteruptTriggerCallback(INTERUPT_GPIO_9_ID);
-			return;
-		case GPIO_PIN_10:
-			InteruptTriggerCallback(INTERUPT_GPIO_10_ID);
-			return;
-		case GPIO_PIN_11:
-			InteruptTriggerCallback(INTERUPT_GPIO_11_ID);
-			return;
-		case GPIO_PIN_12:
-			InteruptTriggerCallback(INTERUPT_GPIO_12_ID);
-			return;
-		case GPIO_PIN_13:
-			InteruptTriggerCallback(INTERUPT_GPIO_13_ID);
-			return;
-		case GPIO_PIN_14:
-			InteruptTriggerCallback(INTERUPT_GPIO_14_ID);
-			return;
-		case GPIO_PIN_15:
-			InteruptTriggerCallback(INTERUPT_GPIO_15_ID);
-			return;
-		default:
-			DebugPrint("%s GPIO Pin [%d] Invalid Interupt.", ITM_TAG, GPIO_Pin);
-			return;
+	int8_t pinId = GetPinInteruptLookUpIndex(GPIO_Pin);
+	if(pinId < 0){
+		DebugPrint("%s GPIO Pin [%d] Invalid Interupt.", ITM_TAG, GPIO_Pin);
+		return;
 	}
+	InteruptTriggerCallback(pinId);
 }

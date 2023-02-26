@@ -51,4 +51,6 @@ PUBLIC void InteruptRegisterCallback(InteruptLookUpIndex id, InteruptCallback ca
 
 PRIVATE void InteruptTriggerCallback(InteruptLookUpIndex id);
 
+PUBLIC int8_t GetPinInteruptLookUpIndex(uint16_t pin);
+
 #endif /* MODULES_INTERUPTMODULE_H_ */
