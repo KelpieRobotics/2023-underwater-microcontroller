@@ -33,7 +33,6 @@ PUBLIC void SetServoAngle(ServoID_t servoID, GPIO_PinState state){
 	HAL_GPIO_WritePin(servoLookup[servoID].GPIO_Bank, servoLookup[servoID].GPIO_Pin, state);
 }
 
-
 // Motor initialization sequence
 PUBLIC void ServoDriverInit()
 {

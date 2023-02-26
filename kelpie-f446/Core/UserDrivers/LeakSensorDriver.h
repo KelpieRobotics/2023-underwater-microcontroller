@@ -11,6 +11,6 @@
 #include "UserTypes.h"
 
 PUBLIC result_t InitLeakSensor();
-PRIVATE result_t LeakSensorIntCallback();
+PRIVATE void LeakSensorIntCallback();
 
 #endif /* USERDRIVERS_LEAKSENSORDRIVER_H_ */
