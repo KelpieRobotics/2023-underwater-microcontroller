@@ -28,7 +28,6 @@ PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm)
 {
 
 	*(thrusterLookup[thrusterID].timerReg) = pwm * thrusterLookup[thrusterID].counterValuePerPWM;
-	SerialPrintln("PWM: %d", *(thrusterLookup[thrusterID].timerReg));
 	if(HAL_TIM_PWM_Start(thrusterLookup[thrusterID].timerHandler, thrusterLookup[thrusterID].timerChannel) == HAL_OK){
 		return RESULT_OK;
 	}

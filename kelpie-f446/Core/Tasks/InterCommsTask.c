@@ -2,12 +2,16 @@
  * InterCommsTask.c
  *
  *  Created on: Oct 22, 2022
- *      Author: mingy
+ *      Author: mingy, eric
  */
 #include "InterCommsTask.h"
 #include "InterCommsModule.h"
 #include "SerialDebugDriver.h"
 #include "PiCommsDriver.h"
+#include "UserTypes.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 // Function alias - replace with the driver api
 #define DebugPrint(...) SerialPrintln(__VA_ARGS__)
@@ -34,29 +38,25 @@ PUBLIC void InitInternalCommsTask(void)
 }
 PRIVATE void InternalCommsTask(void *argument)
 {
+	PiCommsMessage_t msg;
 	uint32_t cycleTick = osKernelGetTickCount();
 	DebugPrint("icomms");
-	PiComms_Init(); // move this to the module, temporarily here for testing
+	InitInternalCommsModule();
+
+	uint8_t *data = malloc(sizeof(uint8_t));
+	*data = 8;
+
 	for(;;)
 	{
 		cycleTick += TIMER_INTERNAL_COMMS_TASK;
 		osDelayUntil(cycleTick);
 		//DebugPrint("icomms loop");
 
-
-		// pi comms demo code, temporary
-		char temp[32] = {'-'};
-		uint8_t index = 0;
-		if(!PiComms_IsEmpty()){
-			while(!PiComms_IsEmpty())
-			{
-				temp[index] = (char)PiComms_GetNextChar();
-				PiComms_Send("Temp: %c \n", temp[index]);
-				index++;
-			}
-
+		while(!PiComms_IsEmpty())			//for each message, call it's callback method
+		{
+			msg = PiComms_GetNext();
+			if(InternalCommsMessageCallback(msg) == RESULT_ERR) DebugPrint("#ERR: InternalCommsTask message callback failed");
+			free(msg.data);						//free msg.data that is allocated in driver
 		}
-
-
 	}
 }

@@ -28,3 +28,10 @@ PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
 		DA_SetAppendageState(CLAW_R, GPIO_PIN_RESET);
 	}
 }
+
+PUBLIC void AAMod_AppendageCallback(void * data){
+	char * state = (char *)data;
+	if(state[0] == 'F') AAMod_SetAppendageValue(-1);
+	else if(state[0] == '1') AAMod_SetAppendageValue(1);
+	else AAMod_SetAppendageValue(0);
+}

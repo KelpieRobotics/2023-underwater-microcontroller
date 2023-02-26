@@ -47,5 +47,6 @@ typedef struct
 
 PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm);
 PUBLIC result_t ThrusterDriverInit();
+PUBLIC pwm_t GetThrusterInitValue();
 
 #endif /* USERDRIVERS_THRUSTERDRIVER_H_ */
