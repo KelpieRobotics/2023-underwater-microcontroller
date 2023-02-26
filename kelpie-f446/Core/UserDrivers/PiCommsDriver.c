@@ -89,15 +89,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			piComms_rxBuffer_index = piComms_rxBuffer;							//reset piComms_rxBuffer
 			memset(piComms_rxBuffer, '\0', rxLen * sizeof(uint8_t));	//clear rx buffer
 			break;
-//		case '\r':		//THIS IS NEEDED FOR DEBUGGING IF \r CHARACTER IS SENT AS PART OF MESSAGE
-//			break;
+		case '\r':		//THIS IS NEEDED FOR DEBUGGING IF \r CHARACTER IS SENT AS PART OF MESSAGE
+			break;
 		default:
 			piComms_rxBuffer_index++;
 			break;
 	}
 
 	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
-	//SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
+	SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
 }
 
 /*Allocates and assigns  */

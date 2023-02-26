@@ -58,19 +58,19 @@ PRIVATE void InteruptTriggerCallback(InteruptLookUpIndex id) {
 	interuptLookUpTable[id].callback();
 }
 
-PRIVATE int8_t binSearch(uint16_t arr[], int8_t l, int8_t r, uint16_t pin)
+PRIVATE int8_t binSearchPinInterupt(uint16_t arr[], int8_t l, int8_t r, uint16_t pin)
 {
 	if (r >= l) {
 		int8_t mid = l + ((r - l)>>1);
 		if (arr[mid] == pin) return mid;
-		if (arr[mid] > pin) return binSearch(arr, l, mid - 1, pin);
-		return binSearch(arr, mid + 1, r, pin);
+		if (arr[mid] > pin) return binSearchPinInterupt(arr, l, mid - 1, pin);
+		return binSearchPinInterupt(arr, mid + 1, r, pin);
 	}
 	return -1;
 }
 
 PUBLIC int8_t GetPinInteruptLookUpIndex(uint16_t pin){
-	return binSearch(GPIO_PIN_ARRAY, 0, NUMBER_INTERUPT_IDS, pin);
+	return binSearchPinInterupt(GPIO_PIN_ARRAY, 0, NUMBER_INTERUPT_IDS, pin);
 }
 
 /*********************************************************************************
