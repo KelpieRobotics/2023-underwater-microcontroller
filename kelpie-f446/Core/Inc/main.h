@@ -59,19 +59,59 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define USART_TX_Pin GPIO_PIN_2
-#define USART_TX_GPIO_Port GPIOA
-#define USART_RX_Pin GPIO_PIN_3
-#define USART_RX_GPIO_Port GPIOA
+#define PI_TX_Pin GPIO_PIN_0
+#define PI_TX_GPIO_Port GPIOA
+#define PRESSURE_ADC_Pin GPIO_PIN_1
+#define PRESSURE_ADC_GPIO_Port GPIOA
+#define DEBUG_TX_Pin GPIO_PIN_2
+#define DEBUG_TX_GPIO_Port GPIOA
+#define DEBUG_RX_Pin GPIO_PIN_3
+#define DEBUG_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define CLAW_RX_Pin GPIO_PIN_5
+#define CLAW_RX_GPIO_Port GPIOC
+#define IMU_SCL_Pin GPIO_PIN_10
+#define IMU_SCL_GPIO_Port GPIOB
 #define LEAK_EXTI_Pin GPIO_PIN_13
 #define LEAK_EXTI_GPIO_Port GPIOB
 #define LEAK_EXTI_EXTI_IRQn EXTI15_10_IRQn
+#define LIGHT_MODULE_EN_Pin GPIO_PIN_15
+#define LIGHT_MODULE_EN_GPIO_Port GPIOB
+#define THRUSTER_5_Pin GPIO_PIN_6
+#define THRUSTER_5_GPIO_Port GPIOC
+#define THRUSTER_6_Pin GPIO_PIN_7
+#define THRUSTER_6_GPIO_Port GPIOC
+#define THRUSTER_7_Pin GPIO_PIN_8
+#define THRUSTER_7_GPIO_Port GPIOC
+#define THRUSTER_8_Pin GPIO_PIN_9
+#define THRUSTER_8_GPIO_Port GPIOC
+#define THRUSTER_1_Pin GPIO_PIN_8
+#define THRUSTER_1_GPIO_Port GPIOA
+#define THRUSTER_2_Pin GPIO_PIN_9
+#define THRUSTER_2_GPIO_Port GPIOA
+#define THRUSTER_3_Pin GPIO_PIN_10
+#define THRUSTER_3_GPIO_Port GPIOA
+#define THRUSTER_4_Pin GPIO_PIN_11
+#define THRUSTER_4_GPIO_Port GPIOA
+#define TMS_Pin GPIO_PIN_13
+#define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
+#define SYRINGE_SERVO_Pin GPIO_PIN_15
+#define SYRINGE_SERVO_GPIO_Port GPIOA
+#define CLAW_TX_Pin GPIO_PIN_10
+#define CLAW_TX_GPIO_Port GPIOC
+#define PI_RX_Pin GPIO_PIN_11
+#define PI_RX_GPIO_Port GPIOC
+#define IMU_SDA_Pin GPIO_PIN_12
+#define IMU_SDA_GPIO_Port GPIOC
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define SENSOR_SCL_Pin GPIO_PIN_6
+#define SENSOR_SCL_GPIO_Port GPIOB
+#define SENSOR_SDA_Pin GPIO_PIN_7
+#define SENSOR_SDA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

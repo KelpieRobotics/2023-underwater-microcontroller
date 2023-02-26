@@ -14,6 +14,7 @@
  * converts the input to thruster , then calls DA_SetThrusterValue
  */
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
+	SerialPrintln("#DEBUG: AAMod_SetAppendageValue state: %d", state);
 	switch(state){
 	case CLAW_OPEN:
 		DA_SetAppendageState(CLAW_L, GPIO_PIN_RESET);

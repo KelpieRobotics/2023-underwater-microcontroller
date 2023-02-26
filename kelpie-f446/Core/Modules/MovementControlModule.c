@@ -36,8 +36,8 @@ PUBLIC void MCMod_ThrusterCallback(void *data)
 	const char * p = (char*)data;						//converting from char-hex to one uint16_t then splitting the uint16_t in two.
 	uint16_t idAndInput = strtol(p, NULL, 16);
 	uint8_t * idAndInputArr = (uint8_t *)(&idAndInput);
-	uint8_t id = idAndInputArr[1];
-	uint8_t input = idAndInputArr[0];
+	uint8_t id = idAndInputArr[0];
+	uint8_t input = idAndInputArr[1];
 
 	SerialPrintln("\tMCMod_ThrusterCallback id: %d, input: %d",id, input);
 	MCMod_SetThrusterValue(id, input);
