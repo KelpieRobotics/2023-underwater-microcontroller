@@ -44,11 +44,7 @@ static InteruptInfo interuptLookUpTable[NUMBER_INTERUPT_IDS] =
 
 PUBLIC void InteruptRegisterCallback(InteruptLookUpIndex id, InteruptCallback callback)
 {
-	//SerialPrintln("A InteruptRegisterCallback: %p: ", callback);
-	//callback();
 	interuptLookUpTable[id].callback = callback;
-	//SerialPrintln("B InteruptRegisterCallback: %p: ", interuptLookUpTable[id].callback);
-	//interuptLookUpTable[id].callback();
 }
 
 
