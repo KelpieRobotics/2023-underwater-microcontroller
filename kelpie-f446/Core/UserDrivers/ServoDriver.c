@@ -28,8 +28,6 @@ const ServoInfo_t servoLookup[NUMBER_SERVOS] =
 // converts target angle into pwm value, checks if the pwm value is within range, send the pwm to the servo
 // NOTE: it is the responsiblity of the module/user/appliction to updates the value in data aggregator, driver does not update the data aggr
 PUBLIC void SetServoAngle(ServoID_t servoID, GPIO_PinState state){
-	//SerialPrintln("Pin State: %d", state);
-
 	HAL_GPIO_WritePin(servoLookup[servoID].GPIO_Bank, servoLookup[servoID].GPIO_Pin, state);
 }
 

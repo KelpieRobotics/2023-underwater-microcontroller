@@ -13,5 +13,6 @@
 
 PUBLIC void MCMod_SetThrusterValue(ThrusterID_t id, uint8_t input);
 PRIVATE pwm_t MapInputToPWM(uint8_t input);
+PUBLIC void MCMod_ThrusterCallback(void *data);
 
 #endif /* MODULES_MOVEMENTCONTROLMODULE_H_ */

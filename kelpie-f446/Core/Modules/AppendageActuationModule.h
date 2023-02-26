@@ -19,5 +19,6 @@ typedef enum {
 } claw_state_t;
 
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state);
+PUBLIC void AAMod_AppendageCallback(void * data);
 
 #endif /* MODULES_APPENDAGEACTUATIONMODULE_H_ */

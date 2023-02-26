@@ -97,6 +97,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 
 	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
+	//SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
 }
 
 /*Allocates and assigns  */
