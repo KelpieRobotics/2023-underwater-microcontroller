@@ -25,7 +25,7 @@ typedef struct PiCommsMessage_t
 {
 	uint16_t messageId;
 	uint16_t dataLen;
-	void *data;
+	uint8_t *data;
 }PiCommsMessage_t;
 
 typedef enum {

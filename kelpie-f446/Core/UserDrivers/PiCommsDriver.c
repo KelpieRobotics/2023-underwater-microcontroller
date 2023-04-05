@@ -66,7 +66,7 @@ PUBLIC void PiComms_Send(const char * message, ...)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(piComms_rxBuffer_index - piComms_rxBuffer > RX_BUFFER_SIZE){
-		SerialPrintln("#ERR: HAL_UART_RxCpltCallback BUFFER FULL");
+		//SerialPrintln("#ERR: HAL_UART_RxCpltCallback BUFFER FULL");
 		if(piComms_rxBuffer_index[0] != '!'){
 			HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
 			return;
@@ -82,7 +82,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 			uint8_t rxLen = piComms_rxBuffer_index - piComms_rxBuffer;
 			if(rxLen < MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE){		//handle incomplete transmissions
-				SerialPrintln("#ERR: HAL_UART_RxCpltCallback rx buffer message missing information, message: %s, len: %d",piComms_rxBuffer, rxLen);
+				//SerialPrintln("#ERR: HAL_UART_RxCpltCallback rx buffer message missing information, message: %s, len: %d",piComms_rxBuffer, rxLen);
 			} else{
 				PiCommsQueue_enqueue(&piCommsQueue, PiComms_rxBufferToMessage());	//convert rx buffer to message and enqueue in message queue
 			}
@@ -97,7 +97,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 
 	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
-	SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
+	//SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
 }
 
 /*Allocates and assigns  */

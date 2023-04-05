@@ -10,8 +10,7 @@
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
 
-// Function alias - replace with the driver api
-#define DebugPrint(...) SerialPrintln(__VA_ARGS__)
+#define TAG "MCT"
 
 // FreeRTOS Configuration
 #define STACK_SIZE 128*8
@@ -44,7 +43,7 @@ PRIVATE void MovementControlTask(void *argument)
 	uint8_t thrusterID = 0;
 	uint32_t cycleTick = osKernelGetTickCount();
 
-	DebugPrint("Movement Control Starting");
+	SerialDebug(TAG, "Movement Control Starting...");
 	ThrusterDriverInit();
 
 	while(thrusterID < NUM_THRUSTERS){
@@ -55,7 +54,7 @@ PRIVATE void MovementControlTask(void *argument)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Movement Control Loop");
+		SerialDebug(TAG, "Movement Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;

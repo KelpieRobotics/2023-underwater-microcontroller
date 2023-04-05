@@ -17,6 +17,8 @@
 #include "MovementControlModule.h"
 #include "AppendageActuationModule.h"
 
+const char * TAG = "ICM";
+
 struct indexMap{
 	uint8_t id, index;
 };
@@ -26,15 +28,56 @@ PRIVATE void swap(struct indexMap *a, struct indexMap *b);
 PRIVATE int partition(struct indexMap array[], int low, int high);
 PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high);
 
+PRIVATE ICommsErr_t ParseMessageToInts(uint8_t * rawMsg, uint16_t rawMsgLen, uint8_t * intPayload); // raw messages come in ascii encoded hex, all messages are in bytes (8bits) hence each pair of chars represents a byte of data
+
 #define NUM_MESSAGES 2
 
 struct indexMap msgIndexMap[NUM_MESSAGES];
+/* NOTE: Message length is the number of characters that make up the data payload in raw ascii encoded hex
+ * 		(message with payload 020E has 2 bytes of data but message len is 4 bytes)
+ * +----------------------------+---------------+-------------------------------------------------------+
+ * |  Message Name				|  Message len	|Payload breakdown	(after converting ascii to int)		|
+ * +----------------------------+---------------+-------------------------------------------------------+
+ * |MCMod_ThrusterCallback		| 4 char		| byte 0 - motor id   									|
+ * |							|				| byte 1 - motor value									|
+ * +----------------------------+---------------+-------------------------------------------------------+
+ * |							|				|														|
+ * |							|				|														|
+ * +----------------------------+---------------+-------------------------------------------------------+
+ */
 ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
 {
 		//ID,	bytes,	callback				//UPDATE NUM_MESSAGES WHEN CALLBACKS ARE ADDED
 		{42, 	4, 		&MCMod_ThrusterCallback},
 		{15,	1,		&AAMod_AppendageCallback},
 };
+
+// Helper function for converting a single char (hex) into int
+PRIVATE uint8_t hex2int(char ch)
+{
+    if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    if (ch >= 'A' && ch <= 'F')
+        return ch - 'A' + 10;
+    if (ch >= 'a' && ch <= 'f')
+        return ch - 'a' + 10;
+    return -1;
+}
+
+// Helper function for parsing the message data payload. converts and combines char representing nybbles into integer bytes
+PRIVATE ICommsErr_t ParseMessageToInts(uint8_t * rawMsg, uint16_t rawMsgLen, uint8_t * intPayload)
+{
+	if(rawMsgLen % 2 == 1)
+	{
+		return ICOMMS_INVALID_MSG_LEN;
+	}
+	for(int i = 0; i<rawMsgLen; i+=2)
+	{
+		intPayload[i/2] = (hex2int(rawMsg[i]) << 4) | hex2int(rawMsg[i+1]);
+		SerialDebug(TAG, "payload %d: %d", i/2, intPayload[i/2]);
+	}
+	return ICOMMS_OK;
+}
 
 //setup mapping message ids to msgCallbackLookup indexes
 PRIVATE void MakeInternalCommsMapping(){
@@ -73,8 +116,11 @@ PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
 		SerialPrintln("#ERR: InternalCommsMessageCallback message dataLen incorrect length. Given %d, Expected %d, msgIndex: %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen, msgIndex);
 		return RESULT_ERR;
 	}
+	uint8_t intPayload[128]; // ascii encoded hex converted int8
+	ICommsErr_t res = ParseMessageToInts(msg.data, msg.dataLen, intPayload); // checks for even number of chars in ascii encoded hex data payload
 
-	msgCallbackLookup[msgIndex].callback(msg.data);
+	SerialDebug(TAG, "Parse Result: %d", res);
+	msgCallbackLookup[msgIndex].callback(intPayload);
 	return RESULT_OK;
 }
 

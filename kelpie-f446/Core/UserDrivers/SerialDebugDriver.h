@@ -28,6 +28,7 @@
 PUBLIC void SerialDebugInit();
 PUBLIC void SerialPrint(const char * message, ...);
 PUBLIC void SerialPrintln(const char * message, ...);
+PUBLIC void SerialDebug(const char * tag, const char * message, ...);
 
 PUBLIC uint8_t GetNextSerialDebugChar();
 PUBLIC uint8_t IsSerialDebugEmpty();
