@@ -5,9 +5,6 @@
  *      Author: Adam
  *
  *  Adapted from: https://github.com/bluerobotics/BlueRobotics_MS5837_Library
- *  License:
- *
- *
  */
 
 
@@ -195,7 +192,7 @@ result_t MS5837_read()
 }
 
 /**
- * @summary: Given C1-C6 and D1, D2, calculate TEMP and P
+ * @summary: Performs calculations per the sensor data sheet for conversion and second order compensation.
  */
 void MS5837_calculate()
 {
@@ -310,7 +307,12 @@ float MS5837_getAltitude() {
 	return (1-pow((MS5837_getPressure(1)/1013.25),.190284))*145366.45*.3048;
 }
 
-
+/**
+ * @summary: CYCLIC REDUNDANCY CHECK (CRC). MS5837 contains a PROM memory with 112-Bit.
+ * A 4-bit CRC has been implemented to check the data validity in memory.
+ * @param: uint16_t n_prom[] - buffer containing 112 bit PROM memory
+ * @return: uint8_t - the calculated crc
+ */
 uint8_t crc4(uint16_t n_prom[]) {
 	uint16_t n_rem = 0;
 
@@ -338,11 +340,10 @@ uint8_t crc4(uint16_t n_prom[]) {
 }
 
 /**
- * @summary: Provide the density of the working fluid in kg/m^3. Default is for
- * seawater. Should be 997 for freshwater
+ * @summary: One function to get the pressure and depth information
  * @param: pressure_t *pressure - pointer to pressure variable
  * @param: depth_t *depth - pointer to depth variable
- * @return: result_t - RESULT_OK if successfull, RESULT_ERR if not
+ * @return: result_t - RESULT_OK if successful, RESULT_ERR if not
  */
 result_t GetValues (pressure_t *pressure, depth_t *depth)
 {
