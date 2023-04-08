@@ -9,7 +9,7 @@
 
 #include "MS5837Driver.h"
 #include <stdbool.h>
-
+#include <math.h>
 
 const uint8_t MS5837_ADDR = 0x76 << 1;
 const uint8_t MS5837_RESET = 0x1E;
