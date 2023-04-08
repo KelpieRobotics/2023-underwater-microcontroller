@@ -162,10 +162,21 @@ result_t MS5837_read()
 	vTaskDelay(20 / portTICK_PERIOD_MS);
 
 	buffer[0] = MS5837_ADC_READ;
-	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+		{
+			SerialPrintln("Failed request for D1 conversion.");
+			return RESULT_ERR;
+		}
 
 
-	HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+		{
+			SerialPrintln("Failed request for D1 conversion.");
+			return RESULT_ERR;
+		}
+
 	D1_pres = 0;
 	D1_pres = buffer[0];
 	D1_pres = (D1_pres << 8) | buffer[1];
@@ -173,14 +184,30 @@ result_t MS5837_read()
 
 	// Request D2 conversion
 	buffer[0] = MS5837_CONVERT_D2_8192;
-	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+		{
+			SerialPrintln("Failed request for D1 conversion.");
+			return RESULT_ERR;
+		}
 
 	vTaskDelay(20 / portTICK_PERIOD_MS); // max delay as per datasheet
 
 	buffer[0] = MS5837_ADC_READ;
-	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+		{
+			SerialPrintln("Failed request for D1 conversion.");
+			return RESULT_ERR;
+		}
 
-	HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+		{
+			SerialPrintln("Failed request for D1 conversion.");
+			return RESULT_ERR;
+		}
+
 	D2_temp = 0;
 	D2_temp = buffer[0];
 	D2_temp = (D2_temp << 8) | buffer[1];
