@@ -50,7 +50,7 @@ bool init() // assign this function to the initialised boolean when you call it;
 
 			HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
 
-			C[i] = (_i2cPort->read() << 8) | _i2cPort->read();
+			C[i] = (buffer[0] << 8) | buffer[1];
 		}
 
 	// Verify that data is correct with CRC
@@ -115,11 +115,26 @@ void MS5837_read()
 	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
 
 
-	HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
+	HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
 	D1_pres = 0;
+	D1_pres = buffer[0];
+	D1_pres = (D1_pres << 8) | buffer[1];
+	D1_pres = (D1_pres << 8) | buffer[2];
 
+	// Request D2 conversion
+	buffer[0] = MS5837_CONVERT_D2_8192;
+	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
 
+	HAL_Delay(20); // Max conversion time per datasheet
 
+	buffer[0] = MS5837_ADC_READ;
+	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+
+	HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
+	D2_temp = 0;
+	D2_temp = buffer[0];
+	D2_temp = (D2_temp << 8) | buffer[1];
+	D2_temp = (D2_temp << 8) | buffer[2];
 
 	MS5837_calculate();
 }
