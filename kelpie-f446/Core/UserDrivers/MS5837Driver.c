@@ -38,10 +38,18 @@ const uint8_t MS5837_02BA01 = 0x00; // Sensor version: From MS5837_02BA datashee
 const uint8_t MS5837_02BA21 = 0x15; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
 const uint8_t MS5837_30BA26 = 0x1A; // Sensor version: From MS5837_30BA datasheet Version PROM Word 0
 
+
+/**
+ * @summary: Sets default fluid density to that of water
+ */
 void MS5837() {
 	fluidDensity = 1029;
 }
 
+/**
+ * @summary: Must be called before attempting to operate the sensor.
+ * @return: result_t - RESULT_OK if successful, RESULT_ERR if not
+ */
 result_t init() // assign this function to the initialised boolean when you call it;
 {
 	HAL_StatusTypeDef ret;
@@ -112,15 +120,28 @@ result_t init() // assign this function to the initialised boolean when you call
 		return RESULT_OK;
 }
 
+/**
+ * @summary: Set model of MS5837 sensor, options are; MS5837_30BA and MS5837_02BA
+ * @param: uint8_t model - model type
+ */
 void MS5837_setModel(uint8_t model) {
 	_model = model;
 }
 
+/**
+ * @summary: Provide the density of the working fluid in kg/m^3. Default is for
+ * seawater. Should be 997 for freshwater
+ * @param: float density - fluid density in kg/m^3
+ */
 void MS5837_setFluidDensity(float density)
 {
 	fluidDensity = density;
 }
 
+/**
+ * @summary: Obtains the temperature and pressure data and sets the D1_pres and D2_temp vars accordingly
+ * @return: result_t - RESULT_OK if successful, RESULT_ERR if not
+ */
 result_t MS5837_read()
 {
 	if(!initialised)
@@ -173,6 +194,9 @@ result_t MS5837_read()
 	return RESULT_OK;
 }
 
+/**
+ * @summary: Given C1-C6 and D1, D2, calculate TEMP and P
+ */
 void MS5837_calculate()
 {
 	// Given C1-C6 and D1, D2, calculated TEMP and P
@@ -239,6 +263,17 @@ void MS5837_calculate()
 
 }
 
+/**
+ * @summary: returns pressure according to a conversion factor
+ *	The pressure sensor measures absolute pressure, so it will measure the atmospheric pressure + water pressure
+ * We subtract the atmospheric pressure to calculate the depth with only the water pressure
+ * The average atmospheric pressure of 101300 pascal is used for the calcuation, but atmospheric pressure varies
+ * If the atmospheric pressure is not 101300 at the time of reading, the depth reported will be offset
+ * In order to calculate the correct depth, the actual atmospheric pressure should be measured once in air, and
+ * that value should subtracted for subsequent depth calculations.
+ * @param: float conversion - either Pa, bar or mbar
+ * @return: float - the pressure from the sensor in the chosen format
+ */
 float MS5837_getPressure(float conversion)
 {
 	if ( _model == MS5837_02BA ) {
@@ -249,18 +284,32 @@ float MS5837_getPressure(float conversion)
 		}
 }
 
+/**
+ * @summary: returns temperature read from the module
+ * @return: float - temperature in C
+ */
 float MS5837_getTemperature()
 {
 	return TEMP/100.0f;
 }
 
+/**
+ * @summary: Depth returned in meters (valid for operation in incompressible
+ *  liquids only. Uses density that is set for fresh or seawater.
+ * @return: float - the depth in meters
+ */
 float MS5837_getDepth() {
 	return (MS5837_getPressure(Pa)-101300)/(fluidDensity*9.80665);
 }
 
+/**
+ * @summary: gets altitude (valid for operation in air only).
+ * @return: float- altitude in meters
+ */
 float MS5837_getAltitude() {
 	return (1-pow((MS5837_getPressure(1)/1013.25),.190284))*145366.45*.3048;
 }
+
 
 uint8_t crc4(uint16_t n_prom[]) {
 	uint16_t n_rem = 0;
@@ -288,6 +337,13 @@ uint8_t crc4(uint16_t n_prom[]) {
 	return n_rem ^ 0x00;
 }
 
+/**
+ * @summary: Provide the density of the working fluid in kg/m^3. Default is for
+ * seawater. Should be 997 for freshwater
+ * @param: pressure_t *pressure - pointer to pressure variable
+ * @param: depth_t *depth - pointer to depth variable
+ * @return: result_t - RESULT_OK if successfull, RESULT_ERR if not
+ */
 result_t GetValues (pressure_t *pressure, depth_t *depth)
 {
 	result_t ret;
