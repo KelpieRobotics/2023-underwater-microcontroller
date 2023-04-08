@@ -60,7 +60,7 @@ result_t init() // assign this function to the initialised boolean when you call
 		return RESULT_ERR;
 	}
 
-	HAL_Delay(10);
+	vTaskDelay(10 / portTICK_PERIOD_MS);
 
 	for (uint8_t i = 0 ; i < 7 ; i++) {
 			buffer[0] = MS5837_PROM_READ+i*2;
@@ -165,7 +165,7 @@ result_t MS5837_read()
 	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
 	if (ret != HAL_OK)
 		{
-			SerialPrintln("Failed request for D1 conversion.");
+			SerialPrintln("Failed request for D1 ADC read.");
 			return RESULT_ERR;
 		}
 
@@ -173,7 +173,7 @@ result_t MS5837_read()
 	ret = HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
 	if (ret != HAL_OK)
 		{
-			SerialPrintln("Failed request for D1 conversion.");
+			SerialPrintln("Failed receive for D1.");
 			return RESULT_ERR;
 		}
 
@@ -187,7 +187,7 @@ result_t MS5837_read()
 	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
 	if (ret != HAL_OK)
 		{
-			SerialPrintln("Failed request for D1 conversion.");
+			SerialPrintln("Failed request for D2 conversion.");
 			return RESULT_ERR;
 		}
 
@@ -197,14 +197,14 @@ result_t MS5837_read()
 	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
 	if (ret != HAL_OK)
 		{
-			SerialPrintln("Failed request for D1 conversion.");
+			SerialPrintln("Failed request for D2 ADC read.");
 			return RESULT_ERR;
 		}
 
 	ret = HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 3, SENSOR_TIMEOUT);
 	if (ret != HAL_OK)
 		{
-			SerialPrintln("Failed request for D1 conversion.");
+			SerialPrintln("Failed receive for D2.");
 			return RESULT_ERR;
 		}
 
