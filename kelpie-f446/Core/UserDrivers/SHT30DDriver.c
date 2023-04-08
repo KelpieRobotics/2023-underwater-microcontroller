@@ -7,7 +7,7 @@
 // replace hi2c1 with a different handle if required
 extern I2C_HandleTypeDef hi2c1;
 
-/*
+/**
  * @summary: Gets values from I2C sensor
  * @param: temperature_t *temperature - pointer to temperature value
  * @param: humidity_t *humidity - pointer to humidity value

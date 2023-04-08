@@ -5,11 +5,25 @@
  *      Author: Adam
  *
  *  Adapted from: https://github.com/bluerobotics/BlueRobotics_MS5837_Library
+ *  License:
+ *
+ *
  */
 
+
+// STM headers
+#include "stm32f4xx_hal.h"
+// My Header
 #include "MS5837Driver.h"
+// Serial library
+#include "SerialDebugDriver.h"
+// Standard library
 #include <stdbool.h>
 #include <math.h>
+
+#define SENSOR_TIMEOUT 500
+
+extern I2C_HandleTypeDef hi2c1;
 
 const uint8_t MS5837_ADDR = 0x76 << 1;
 const uint8_t MS5837_RESET = 0x1E;
@@ -18,13 +32,7 @@ const uint8_t MS5837_PROM_READ = 0xA0;
 const uint8_t MS5837_CONVERT_D1_8192 = 0x4A;
 const uint8_t MS5837_CONVERT_D2_8192 = 0x5A;
 
-const float Pa = 100.0f;
-const float bar = 0.001f;
-const float mbar = 1.0f;
 
-const uint8_t MS5837_30BA = 0;
-const uint8_t MS5837_02BA = 1;
-const uint8_t MS5837_UNRECOGNISED = 255;
 
 const uint8_t MS5837_02BA01 = 0x00; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
 const uint8_t MS5837_02BA21 = 0x15; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
@@ -34,21 +42,37 @@ void MS5837() {
 	fluidDensity = 1029;
 }
 
-bool init() // assign this function to the initialised boolean when you call it;
+result_t init() // assign this function to the initialised boolean when you call it;
 {
+	HAL_StatusTypeDef ret;
 	uint8_t buffer[6];
 
 	buffer[0] = MS5837_RESET;
-	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+	{
+		SerialPrintln("Reset failed.");
+		return RESULT_ERR;
+	}
 
 	HAL_Delay(10);
 
 	for (uint8_t i = 0 ; i < 7 ; i++) {
 			buffer[0] = MS5837_PROM_READ+i*2;
 
-			HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+			ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+			if (ret != HAL_OK)
+			{
+				SerialPrintln("Request failed.");
+				return RESULT_ERR;
+			}
 
-			HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
+			ret = HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
+			if (ret != HAL_OK)
+			{
+				SerialPrintln("Failed to receive.");
+				return RESULT_ERR;
+			}
 
 			C[i] = (buffer[0] << 8) | buffer[1];
 		}
@@ -58,7 +82,8 @@ bool init() // assign this function to the initialised boolean when you call it;
 		uint8_t crcCalculated = crc4(C);
 
 		if ( crcCalculated != crcRead ) {
-			return false; // CRC fail
+			SerialPrintln("Failed CRC.");
+			return RESULT_ERR; // CRC fail
 		}
 
 		uint8_t version = (C[0] >> 5) & 0x7F; // Extract the sensor version from PROM Word 0
@@ -84,7 +109,7 @@ bool init() // assign this function to the initialised boolean when you call it;
 		// the sensor version is unrecognised.
 		// (The MS5637 has the same address as the MS5837 and will also pass the CRC check)
 		// (but will hopefully be unrecognised.)
-		return true;
+		return RESULT_OK;
 }
 
 void MS5837_setModel(uint8_t model) {
@@ -96,20 +121,27 @@ void MS5837_setFluidDensity(float density)
 	fluidDensity = density;
 }
 
-void MS5837_read()
+result_t MS5837_read()
 {
-	if(!intialised)
+	if(!initialised)
 	{
-		return;
+		return RESULT_ERR;
 	}
+
+	HAL_StatusTypeDef ret;
 
 	uint8_t buffer[6];
 	buffer[0] = MS5837_CONVERT_D1_8192;
 
 	// Request D1 conversion
-	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	ret = HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+	if (ret != HAL_OK)
+	{
+		SerialPrintln("Failed request for D1 conversion.");
+		return RESULT_ERR;
+	}
 
-	HAL_Delay(20); // Max conversion time per datasheet
+	vTaskDelay(20 / portTICK_PERIOD_MS);
 
 	buffer[0] = MS5837_ADC_READ;
 	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
@@ -125,7 +157,7 @@ void MS5837_read()
 	buffer[0] = MS5837_CONVERT_D2_8192;
 	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
 
-	HAL_Delay(20); // Max conversion time per datasheet
+	vTaskDelay(20 / portTICK_PERIOD_MS); // max delay as per datasheet
 
 	buffer[0] = MS5837_ADC_READ;
 	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
@@ -137,6 +169,8 @@ void MS5837_read()
 	D2_temp = (D2_temp << 8) | buffer[2];
 
 	MS5837_calculate();
+
+	return RESULT_OK;
 }
 
 void MS5837_calculate()
@@ -154,30 +188,30 @@ void MS5837_calculate()
 		int64_t SENS2 = 0;
 
 		// Terms called
-		dT = D2_temp-uint32_t(C[5])*256l;
+		dT = D2_temp-(uint32_t)C[5]*256l;
 		if ( _model == MS5837_02BA ) {
-			SENS = int64_t(C[1])*65536l+(int64_t(C[3])*dT)/128l;
-			OFF = int64_t(C[2])*131072l+(int64_t(C[4])*dT)/64l;
+			SENS = (int64_t)C[1]*65536l+((int64_t)C[3]*dT)/128l;
+			OFF = (int64_t)C[2]*131072l+((int64_t)C[4]*dT)/64l;
 			P = (D1_pres*SENS/(2097152l)-OFF)/(32768l);
 		} else {
-			SENS = int64_t(C[1])*32768l+(int64_t(C[3])*dT)/256l;
-			OFF = int64_t(C[2])*65536l+(int64_t(C[4])*dT)/128l;
+			SENS = (int64_t)C[1]*32768l+((int64_t)C[3]*dT)/256l;
+			OFF = (int64_t)C[2]*65536l+((int64_t)C[4]*dT)/128l;
 			P = (D1_pres*SENS/(2097152l)-OFF)/(8192l);
 		}
 
 		// Temp conversion
-		TEMP = 2000l+int64_t(dT)*C[6]/8388608LL;
+		TEMP = 2000l+(int64_t)dT*C[6]/8388608LL;
 
 		//Second order compensation
 		if ( _model == MS5837_02BA ) {
 			if((TEMP/100)<20){         //Low temp
-				Ti = (11*int64_t(dT)*int64_t(dT))/(34359738368LL);
+				Ti = (11*(int64_t)dT*(int64_t)dT)/(34359738368LL);
 				OFFi = (31*(TEMP-2000)*(TEMP-2000))/8;
 				SENSi = (63*(TEMP-2000)*(TEMP-2000))/32;
 			}
 		} else {
 			if((TEMP/100)<20){         //Low temp
-				Ti = (3*int64_t(dT)*int64_t(dT))/(8589934592LL);
+				Ti = (3*(int64_t)dT*(int64_t)dT)/(8589934592LL);
 				OFFi = (3*(TEMP-2000)*(TEMP-2000))/2;
 				SENSi = (5*(TEMP-2000)*(TEMP-2000))/8;
 				if((TEMP/100)<-15){    //Very low temp
@@ -225,7 +259,7 @@ float MS5837_getDepth() {
 }
 
 float MS5837_getAltitude() {
-	return (1-pow((MS5837_getPressure()/1013.25),.190284))*145366.45*.3048;
+	return (1-pow((MS5837_getPressure(1)/1013.25),.190284))*145366.45*.3048;
 }
 
 uint8_t crc4(uint16_t n_prom[]) {
@@ -252,4 +286,22 @@ uint8_t crc4(uint16_t n_prom[]) {
 	n_rem = ((n_rem >> 12) & 0x000F);
 
 	return n_rem ^ 0x00;
+}
+
+result_t GetValues (pressure_t *pressure, depth_t *depth)
+{
+	result_t ret;
+
+	ret = MS5837_read();
+
+	if (ret != RESULT_OK)
+	{
+		SerialPrintln("Failed to read values from MS5837.");
+		return RESULT_ERR;
+	}
+
+	*pressure = MS5837_getPressure(1.0);
+	*depth = MS5837_getDepth();
+
+	return RESULT_OK;
 }
