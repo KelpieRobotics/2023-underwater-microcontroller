@@ -10,9 +10,7 @@
 #include "DataAggregationModule.h"
 #include "SerialDebugDriver.h"
 
-// Function alias - replace with the driver api
-#define DebugPrint(...) SerialPrintln(__VA_ARGS__)
-
+#define TAG "AAT"
 // FreeRTOS Configuration
 #define STACK_SIZE 128*8
 #define APP_ACT_TASK_PRIORITY (osPriority_t) osPriorityRealtime3
@@ -44,14 +42,14 @@ PRIVATE void AppendageActuationTask(void *argument)
 	uint8_t servoID;
 	uint32_t cycleTick = osKernelGetTickCount();
 
-	DebugPrint("Actuator Control Starting");
+	SerialDebug(TAG, "Actuator Control Starting...");
 	ServoDriverInit();
 
 	for(;;)
 	{
 		cycleTick += TIMER_APP_ACT_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Actuator Control Loop");
+		SerialDebug(TAG, "Actuator Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		servoID = 0;

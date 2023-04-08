@@ -8,9 +8,10 @@
  */
 
 #include "MS5837Driver.h"
+#include <stdbool.h>
 
 
-const uint8_t MS5837_ADDR = 0x76;
+const uint8_t MS5837_ADDR = 0x76 << 1;
 const uint8_t MS5837_RESET = 0x1E;
 const uint8_t MS5837_ADC_READ = 0x00;
 const uint8_t MS5837_PROM_READ = 0xA0;
@@ -28,3 +29,151 @@ const uint8_t MS5837_UNRECOGNISED = 255;
 const uint8_t MS5837_02BA01 = 0x00; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
 const uint8_t MS5837_02BA21 = 0x15; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
 const uint8_t MS5837_30BA26 = 0x1A; // Sensor version: From MS5837_30BA datasheet Version PROM Word 0
+
+void MS5837() {
+	fluidDensity = 1029;
+}
+
+bool init() // assign this function to the initialised boolean when you call it;
+{
+	uint8_t buffer[6];
+
+	buffer[0] = MS5837_RESET;
+	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+
+	HAL_Delay(10);
+
+	for (uint8_t i = 0 ; i < 7 ; i++) {
+			buffer[0] = MS5837_PROM_READ+i*2;
+
+			HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+
+			HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
+
+			C[i] = (_i2cPort->read() << 8) | _i2cPort->read();
+		}
+
+	// Verify that data is correct with CRC
+		uint8_t crcRead = C[0] >> 12;
+		uint8_t crcCalculated = crc4(C);
+
+		if ( crcCalculated != crcRead ) {
+			return false; // CRC fail
+		}
+
+		uint8_t version = (C[0] >> 5) & 0x7F; // Extract the sensor version from PROM Word 0
+
+		// Set _model according to the sensor version
+		if (version == MS5837_02BA01)
+		{
+			_model = MS5837_02BA;
+		}
+		else if (version == MS5837_02BA21)
+		{
+			_model = MS5837_02BA;
+		}
+		else if (version == MS5837_30BA26)
+		{
+			_model = MS5837_30BA;
+		}
+		else
+		{
+			_model = MS5837_UNRECOGNISED;
+		}
+		// The sensor has passed the CRC check, so we should return true even if
+		// the sensor version is unrecognised.
+		// (The MS5637 has the same address as the MS5837 and will also pass the CRC check)
+		// (but will hopefully be unrecognised.)
+		return true;
+}
+
+void MS5837_setModel(uint8_t model) {
+	_model = model;
+}
+
+void MS5837_setFluidDensity(float density)
+{
+	fluidDensity = density;
+}
+
+void MS5837_read()
+{
+	if(!intialised)
+	{
+		return;
+	}
+
+	uint8_t buffer[6];
+	buffer[0] = MS5837_CONVERT_D1_8192;
+
+	// Request D1 conversion
+	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+
+	HAL_Delay(20); // Max conversion time per datasheet
+
+	buffer[0] = MS5837_ADC_READ;
+	HAL_I2C_Master_Transmit(&hi2c1, MS5837_ADDR, buffer, 1, SENSOR_TIMEOUT);
+
+
+	HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
+	D1_pres = 0;
+
+
+
+
+	MS5837_calculate();
+}
+
+void MS5837_calculate()
+{
+
+}
+
+float MS5837_getPressure(float conversion)
+{
+	if ( _model == MS5837_02BA ) {
+			return P*conversion/100.0f;
+		}
+		else {
+			return P*conversion/10.0f;
+		}
+}
+
+float MS5837_getTemperature()
+{
+	return TEMP/100.0f;
+}
+
+float MS5837_getDepth() {
+	return (MS5837_getPressure(Pa)-101300)/(fluidDensity*9.80665);
+}
+
+float MS5837_getAltitude() {
+	return (1-pow((MS5837_getPressure()/1013.25),.190284))*145366.45*.3048;
+}
+
+uint8_t crc4(uint16_t n_prom[]) {
+	uint16_t n_rem = 0;
+
+	n_prom[0] = ((n_prom[0]) & 0x0FFF);
+	n_prom[7] = 0;
+
+	for ( uint8_t i = 0 ; i < 16; i++ ) {
+		if ( i%2 == 1 ) {
+			n_rem ^= (uint16_t)((n_prom[i>>1]) & 0x00FF);
+		} else {
+			n_rem ^= (uint16_t)(n_prom[i>>1] >> 8);
+		}
+		for ( uint8_t n_bit = 8 ; n_bit > 0 ; n_bit-- ) {
+			if ( n_rem & 0x8000 ) {
+				n_rem = (n_rem << 1) ^ 0x3000;
+			} else {
+				n_rem = (n_rem << 1);
+			}
+		}
+	}
+
+	n_rem = ((n_rem >> 12) & 0x000F);
+
+	return n_rem ^ 0x00;
+}

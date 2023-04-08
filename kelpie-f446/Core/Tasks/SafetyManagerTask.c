@@ -10,8 +10,7 @@
 #include "SerialDebugDriver.h"
 #include "LeakSensorDriver.h"
 
-// Function alias - replace with the driver api
-#define DebugPrint(...) SerialPrintln(__VA_ARGS__)
+#define TAG "SMT"
 
 // FreeRTOS Configuration
 #define STACK_SIZE 128*4
@@ -38,7 +37,7 @@ PUBLIC void InitSafetyTask(void)
 PRIVATE void SafetyTask(void *argument)
 {
 	uint32_t cycleTick = osKernelGetTickCount();
-	DebugPrint("safety");
+	SerialDebug(TAG, "Safety Manager Task Starting...");
 
 	InitLeakSensor();
 
@@ -46,7 +45,7 @@ PRIVATE void SafetyTask(void *argument)
 	{
 		cycleTick += TIMER_SAFETY_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("safety loop");
+		SerialDebug(TAG, "Safety loop");
 
 
 	}

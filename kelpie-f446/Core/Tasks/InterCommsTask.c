@@ -13,8 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Function alias - replace with the driver api
-#define DebugPrint(...) SerialPrintln(__VA_ARGS__)
+#define TAG "ICT"
+
 
 #define STACK_SIZE 128*8
 #define INTERNAL_COMMS_TASK_PRIORITY (osPriority_t) osPriorityRealtime1
@@ -40,7 +40,7 @@ PRIVATE void InternalCommsTask(void *argument)
 {
 	PiCommsMessage_t msg;
 	uint32_t cycleTick = osKernelGetTickCount();
-	DebugPrint("icomms");
+	SerialDebug(TAG, "InterCommsTask Starting...");
 	InitInternalCommsModule();
 
 	uint8_t *data = malloc(sizeof(uint8_t));
@@ -50,12 +50,15 @@ PRIVATE void InternalCommsTask(void *argument)
 	{
 		cycleTick += TIMER_INTERNAL_COMMS_TASK;
 		osDelayUntil(cycleTick);
-		//DebugPrint("icomms loop");
+		//SerialDebug(TAG, "InterCommsTask Loop");
 
 		while(!PiComms_IsEmpty())			//for each message, call it's callback method
 		{
 			msg = PiComms_GetNext();
-			if(InternalCommsMessageCallback(msg) == RESULT_ERR) DebugPrint("#ERR: InternalCommsTask message callback failed");
+			if(InternalCommsMessageCallback(msg) == RESULT_ERR)
+			{
+				SerialDebug(TAG,"ERR: InternalCommsTask message callback failed");
+			}
 			free(msg.data);						//free msg.data that is allocated in driver
 		}
 	}

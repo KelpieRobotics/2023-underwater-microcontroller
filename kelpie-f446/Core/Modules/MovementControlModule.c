@@ -11,6 +11,8 @@
 #include "UserTypes.h"
 #include "stdlib.h"
 
+#define TAG "MCM"
+
 //this works as long as the motor uses THRUSTER_SAFE_MIN_VALUE as full reverse, THRUSTER_SAFE_MAX_VALUE as full forward, and their average as stationary
 const double PWM_SCALE = (double)(THRUSTER_SAFE_MAX_VALUE - THRUSTER_SAFE_MIN_VALUE) / (255.0);
 
@@ -30,15 +32,13 @@ PRIVATE pwm_t MapInputToPWM(uint8_t input){
 	return THRUSTER_SAFE_MIN_VALUE + (pwm_t)(PWM_SCALE * input);
 }
 
-//takes void* and calls MCMod_SetThrusterValue with uint8_t id, uint8_t input
-PUBLIC void MCMod_ThrusterCallback(void *data)
+//takes uint8_t* and calls MCMod_SetThrusterValue with uint8_t id, uint8_t input
+PUBLIC void MCMod_ThrusterCallback(uint8_t *data)
 {
-	const char * p = (char*)data;						//converting from char-hex to one uint16_t then splitting the uint16_t in two.
-	uint16_t idAndInput = strtol(p, NULL, 16);
-	uint8_t * idAndInputArr = (uint8_t *)(&idAndInput);
-	uint8_t id = idAndInputArr[0];
-	uint8_t input = idAndInputArr[1];
 
-	SerialPrintln("\tMCMod_ThrusterCallback id: %d, input: %d",id, input);
+	uint8_t id = data[0];
+	uint8_t input = data[1];
+
+	SerialDebug(TAG,"MCMod_ThrusterCallback id: %d, input: %d",id, input);
 	MCMod_SetThrusterValue(id, input);
 }

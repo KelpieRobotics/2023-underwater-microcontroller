@@ -53,6 +53,26 @@ PUBLIC void SerialPrintln(const char * message, ...)
 	HAL_UART_Transmit(&huart2, (uint8_t*)messageBuf, len+2, HAL_MAX_DELAY);
 	va_end(args);
 }
+#define TAG_LEN 3
+#define TAG_HEADER_LEN 6
+
+PUBLIC void SerialDebug(const char * tag, const char * message, ...)
+{
+	va_list args;
+	va_start(args, message);
+	length_t len = vsprintf(messageBuf+TAG_HEADER_LEN, message, args);
+	messageBuf[0] = '#';
+	messageBuf[4] = ':';
+	messageBuf[5] = ' ';
+	for(int i = 0; i < TAG_LEN;i++)
+	{
+		messageBuf[i+1] = tag[i];
+	}
+	messageBuf[len+TAG_HEADER_LEN] = '\n';
+	messageBuf[len+1+TAG_HEADER_LEN] = '\r';
+	HAL_UART_Transmit(&huart2, (uint8_t*)messageBuf, len+TAG_HEADER_LEN+2, HAL_MAX_DELAY);
+	va_end(args);
+}
 
 /* DO NOT USE, CONFLICTS WITH PI COMMS
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)

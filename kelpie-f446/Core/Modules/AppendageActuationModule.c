@@ -9,12 +9,12 @@
 #include "DataAggregationModule.h"
 #include "UserTypes.h"
 
-
+#define TAG "AAM"
 /*
  * converts the input to thruster , then calls DA_SetThrusterValue
  */
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
-	SerialPrintln("#DEBUG: AAMod_SetAppendageValue state: %d", state);
+	SerialDebug(TAG, "#DEBUG: AAMod_SetAppendageValue state: %d", state);
 	switch(state){
 	case CLAW_OPEN:
 		DA_SetAppendageState(CLAW_L, GPIO_PIN_RESET);
@@ -30,9 +30,11 @@ PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
 	}
 }
 
-PUBLIC void AAMod_AppendageCallback(void * data){
+PUBLIC void AAMod_AppendageCallback(uint8_t * data){
+	/*
 	char * state = (char *)data;
 	if(state[0] == 'F') AAMod_SetAppendageValue(-1);
 	else if(state[0] == '1') AAMod_SetAppendageValue(1);
 	else AAMod_SetAppendageValue(0);
+	*/
 }

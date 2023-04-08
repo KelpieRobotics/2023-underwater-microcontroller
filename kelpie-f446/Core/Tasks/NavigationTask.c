@@ -9,8 +9,7 @@
 #include "NavigationTask.h"
 #include "SerialDebugDriver.h"
 
-// Function alias - replace with the driver api
-#define DebugPrint(...) SerialPrintln(__VA_ARGS__)
+#define TAG "NAT"
 
 // FreeRTOS Configuration
 #define STACK_SIZE 128*8
@@ -32,11 +31,11 @@ PUBLIC void InitNavigationTask(void)
 PRIVATE void NavigationTask(void *argument)
 {
 	uint32_t cycleTick = osKernelGetTickCount();
-	DebugPrint("Navigation Task Starting");
+	SerialDebug(TAG, "Navigation Task Starting...");
 	for(;;)
 	{
 		cycleTick += TIMER_NAV_TASK;
 		osDelayUntil(cycleTick);
-		DebugPrint("Navigation Task Loop");
+		SerialDebug(TAG, "Navigation Task Loop");
 	}
 }
