@@ -7,7 +7,7 @@
 
 #include "MovementControlModule.h"
 #include "DataAggregationModule.h"
-#include "ThrusterDriver.h"
+#include "PWMDriver.h"
 #include "UserTypes.h"
 #include "stdlib.h"
 

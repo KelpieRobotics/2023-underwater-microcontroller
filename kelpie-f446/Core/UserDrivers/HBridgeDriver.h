@@ -5,8 +5,8 @@
  *      Author: mingy, eric
  */
 
-#ifndef USERDRIVERS_SERVODRIVER_H_
-#define USERDRIVERS_SERVODRIVER_H_
+#ifndef USERDRIVERS_HBRIDGEDRIVER_H_
+#define USERDRIVERS_HBRIDGEDRIVER_H_
 
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
@@ -32,4 +32,4 @@ PUBLIC void SetServoAngle(ServoID_t servoID, GPIO_PinState state);
 PUBLIC void ServoDriverInit();
 PUBLIC pwm_t ServoDriverInputToPWM(uint8_t id, uint8_t input);
 
-#endif /* USERDRIVERS_SERVODRIVER_H_ */
+#endif /* USERDRIVERS_HBRIDGEDRIVER_H_ */

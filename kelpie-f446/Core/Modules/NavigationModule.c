@@ -6,5 +6,5 @@
  */
 
 #include "NavigationModule.h"
-#include "IMUDriver.h"
+#include "Adafruit_BNO080/IMUDriver.h"
 #include "DataAggregationModule.h"

@@ -8,10 +8,10 @@
 #ifndef MODULES_DATAAGGREGATIONMODULE_H_
 #define MODULES_DATAAGGREGATIONMODULE_H_
 
+#include <HBridgeDriver.h>
 #include "UserTypes.h"
 #include "SerialDebugDriver.h"
-#include "ThrusterDriver.h"
-#include "ServoDriver.h"
+#include "PWMDriver.h"
 
 typedef struct ThrusterData_t{
 	pwm_t value;

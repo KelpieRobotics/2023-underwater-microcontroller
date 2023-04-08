@@ -6,7 +6,7 @@
  */
 
 #include "MovementControlTask.h"
-#include "ThrusterDriver.h"
+#include "PWMDriver.h"
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
 

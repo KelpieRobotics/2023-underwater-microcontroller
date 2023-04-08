@@ -5,9 +5,9 @@
  *      Author: mingy
  */
 
+#include <HBridgeDriver.h>
 #include "AppendageActuationTask.h"
 #include "DataAggregationModule.h"
-#include "ServoDriver.h"
 #include "SerialDebugDriver.h"
 
 // Function alias - replace with the driver api
