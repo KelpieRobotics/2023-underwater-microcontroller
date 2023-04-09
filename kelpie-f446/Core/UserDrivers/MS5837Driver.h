@@ -33,18 +33,9 @@
 #include "task.h"
 #include <stdbool.h>
 
-const float Pa = 100.0f;
-const float bar = 0.001f;
-const float mbar = 1.0f;
-
-const uint8_t MS5837_30BA = 0;
-const uint8_t MS5837_02BA = 1;
-const uint8_t MS5837_UNRECOGNISED = 255;
-
 void MS5837();
 
-result_t MS5837_init();
-bool initialised = false;
+PUBLIC result_t MS5837_init();
 
 /** Set model of MS5837 sensor. Valid options are MS5837::MS5837_30BA (default)
  * and MS5837::MS5837_02BA.
@@ -59,7 +50,7 @@ void MS5837_setFluidDensity(float density);
 
 /** The read from I2C takes up to 40 ms, so use sparingly is possible.
  */
-result_t MS5837_read();
+PUBLIC result_t MS5837_read();
 
 /** Pressure returned in mbar or mbar*conversion rate.
  */
@@ -78,15 +69,7 @@ float MS5837_getDepth();
  */
 float MS5837_getAltitude();
 
-result_t GetValues(pressure_t *pressure, depth_t *depth);
-
-uint16_t C[8];
-uint32_t D1_pres, D2_temp;
-int32_t TEMP;
-int32_t P;
-uint8_t _model;
-
-float fluidDensity;
+PUBLIC result_t MS5837_getValues(pressure_t *pressure, depth_t *depth);
 
 /** Performs calculations per the sensor data sheet for conversion and
  *  second order compensation.

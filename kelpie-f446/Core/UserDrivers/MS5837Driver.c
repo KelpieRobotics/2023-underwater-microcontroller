@@ -29,15 +29,32 @@ const uint8_t MS5837_PROM_READ = 0xA0;
 const uint8_t MS5837_CONVERT_D1_8192 = 0x4A;
 const uint8_t MS5837_CONVERT_D2_8192 = 0x5A;
 
-
-
 const uint8_t MS5837_02BA01 = 0x00; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
 const uint8_t MS5837_02BA21 = 0x15; // Sensor version: From MS5837_02BA datasheet Version PROM Word 0
 const uint8_t MS5837_30BA26 = 0x1A; // Sensor version: From MS5837_30BA datasheet Version PROM Word 0
 
+const float Pa = 100.0f;
+const float bar = 0.001f;
+const float mbar = 1.0f;
+
+const uint8_t MS5837_30BA = 0;
+const uint8_t MS5837_02BA = 1;
+const uint8_t MS5837_UNRECOGNISED = 255;
+
+uint16_t C[8];
+uint32_t D1_pres, D2_temp;
+int32_t TEMP;
+int32_t P;
+uint8_t _model;
+
+float fluidDensity = 1027;
+
+bool initialised = false;
+
+
 
 /**
- * @summary: Sets default fluid density to that of water
+ * @summary: Sets default fluid density to that of seawater
  */
 void MS5837() {
 	fluidDensity = 1029;
@@ -47,7 +64,7 @@ void MS5837() {
  * @summary: Must be called before attempting to operate the sensor.
  * @return: result_t - RESULT_OK if successful, RESULT_ERR if not
  */
-result_t init() // assign this function to the initialised boolean when you call it;
+PUBLIC result_t MS5837_init() // assign this function to the initialised boolean when you call it;
 {
 	HAL_StatusTypeDef ret;
 	uint8_t buffer[6];
@@ -114,6 +131,7 @@ result_t init() // assign this function to the initialised boolean when you call
 		// the sensor version is unrecognised.
 		// (The MS5637 has the same address as the MS5837 and will also pass the CRC check)
 		// (but will hopefully be unrecognised.)
+		initialised = true;
 		return RESULT_OK;
 }
 
@@ -372,7 +390,7 @@ uint8_t crc4(uint16_t n_prom[]) {
  * @param: depth_t *depth - pointer to depth variable
  * @return: result_t - RESULT_OK if successful, RESULT_ERR if not
  */
-result_t GetValues (pressure_t *pressure, depth_t *depth)
+PUBLIC result_t MS5837_getValues (pressure_t *pressure, depth_t *depth)
 {
 	result_t ret;
 

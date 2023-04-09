@@ -14,6 +14,7 @@
 
 // Our headers
 #include "UserTypes.h"
+#include "MS5837Driver.h"
 
 // STD headers
 #include <stdint.h>
