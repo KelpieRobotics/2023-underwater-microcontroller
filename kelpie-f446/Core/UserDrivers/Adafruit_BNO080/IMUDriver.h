@@ -16,7 +16,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define IMU_ADDRESS 0x4A
+#define IMU_ADDRESS 0x4A <<1
 #define IMU_TIMEOUT 500 // millis
 
 typedef struct IMUInfo_t

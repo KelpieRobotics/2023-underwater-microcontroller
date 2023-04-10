@@ -10,6 +10,7 @@
 #include "PWMDriver.h"
 #include "UserTypes.h"
 #include "stdlib.h"
+#include "PiCommsDriver.h"
 
 #define TAG "MCM"
 
@@ -41,4 +42,5 @@ PUBLIC void MCMod_ThrusterCallback(uint8_t *data)
 
 	SerialDebug(TAG,"MCMod_ThrusterCallback id: %d, input: %d",id, input);
 	MCMod_SetThrusterValue(id, input);
+	PiComms_Send("#ACK:MCM!");
 }

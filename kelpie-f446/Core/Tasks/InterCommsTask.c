@@ -50,7 +50,7 @@ PRIVATE void InternalCommsTask(void *argument)
 	{
 		cycleTick += TIMER_INTERNAL_COMMS_TASK;
 		osDelayUntil(cycleTick);
-		//SerialDebug(TAG, "InterCommsTask Loop");
+		SerialDebug(TAG, "InterCommsTask Loop");
 
 		while(!PiComms_IsEmpty())			//for each message, call it's callback method
 		{
