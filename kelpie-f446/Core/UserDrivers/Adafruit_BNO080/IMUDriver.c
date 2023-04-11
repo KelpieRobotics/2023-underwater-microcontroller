@@ -5,6 +5,9 @@
  *      Author: mingy
  */
 
+ // FILE MODIFIED FROM ADAFRUIT LIBRARY, FOUND HERE:
+ // FIND MIT LICENSE IN LICENSE.txt
+
 #include "IMUDriver.h"
 #include "SerialDebugDriver.h"
 
