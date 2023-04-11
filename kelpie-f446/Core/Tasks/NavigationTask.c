@@ -46,12 +46,12 @@ PRIVATE void NavigationTask(void *argument)
 		osDelayUntil(cycleTick);
 		SerialDebug(TAG, "Navigation Task Loop");
 
-		if (MS5837_read() != RESULT_OK)
+		/*if (MS5837_read() != RESULT_OK)
 		    {
 		    	SerialPrintln("Did not read MS5837 correctly.");
 		    }
 
 		MS5837_getValues(&pressure, &depth);
-		SerialPrintln("Current Pressure: %f", pressure);
+		SerialPrintln("Current Pressure: %f", pressure);*/
 	}
 }
