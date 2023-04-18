@@ -17,6 +17,7 @@ typedef uint16_t length_t;
 typedef float temperature_t;
 typedef float humidity_t;
 typedef float pressure_t;
+typedef float depth_t;
 typedef uint16_t angular_degrees_t;
 typedef uint16_t pwm_t;
 typedef uint16_t appendage_t;

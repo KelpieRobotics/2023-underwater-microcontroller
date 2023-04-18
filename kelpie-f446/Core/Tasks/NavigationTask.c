@@ -10,6 +10,7 @@
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
 #include "Adafruit_BNO080/IMUDriver.h"
+#include "MS5837Driver.h"
 
 #define TAG "NAT"
 
@@ -63,6 +64,7 @@ PRIVATE void NavigationTask(void *argument)
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "Navigation Task Starting...");
 	result_t initRes = NavigationIMUInit();
+	initRes = NAMod_SensorsInit();
 
 	sh2_SensorValue_t values;
 	for(;;)
@@ -106,5 +108,9 @@ PRIVATE void NavigationTask(void *argument)
 			SerialDebug(TAG, "Error getting imu quaternion values");
 		}
 
+		if (NAMod_SensorRoutine() != RESULT_OK)
+		{
+			SerialDebug(TAG, "Error getting PRESSURE SENSOR values");
+		}
 	}
 }

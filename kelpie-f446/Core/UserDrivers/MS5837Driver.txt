@@ -10,6 +10,7 @@
 #include "MS5837Driver.h"
 #include <stdbool.h>
 
+extern I2C_HandleTypeDef hi2c1;
 
 const uint8_t MS5837_ADDR = 0x76 << 1;
 const uint8_t MS5837_RESET = 0x1E;
@@ -50,7 +51,7 @@ bool init() // assign this function to the initialised boolean when you call it;
 
 			HAL_I2C_Master_Receive(&hi2c1, MS5837_ADDR, buffer, 2, SENSOR_TIMEOUT);
 
-			C[i] = (_i2cPort->read() << 8) | _i2cPort->read();
+			C[i] = (buffer[0] << 8) | buffer[1];
 		}
 
 	// Verify that data is correct with CRC
@@ -84,6 +85,7 @@ bool init() // assign this function to the initialised boolean when you call it;
 		// the sensor version is unrecognised.
 		// (The MS5637 has the same address as the MS5837 and will also pass the CRC check)
 		// (but will hopefully be unrecognised.)
+		initialised = true;
 		return true;
 }
 
@@ -98,7 +100,7 @@ void MS5837_setFluidDensity(float density)
 
 void MS5837_read()
 {
-	if(!intialised)
+	if(!initialised)
 	{
 		return;
 	}
@@ -149,7 +151,8 @@ float MS5837_getDepth() {
 }
 
 float MS5837_getAltitude() {
-	return (1-pow((MS5837_getPressure()/1013.25),.190284))*145366.45*.3048;
+	// 1.0 in the getPressure function is the conversion rate from pressure to meters of air.
+	return (1-pow((MS5837_getPressure(1.0)/1013.25),.190284))*145366.45*.3048;
 }
 
 uint8_t crc4(uint16_t n_prom[]) {

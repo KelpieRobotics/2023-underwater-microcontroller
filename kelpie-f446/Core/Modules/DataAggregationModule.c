@@ -57,6 +57,18 @@ PUBLIC void DA_SetTemperature(temperature_t t)
 	SystemData.temperature = t;
 }
 
+PUBLIC void DA_SetDepth(depth_t t)
+{
+	DPRINT(TAG, "Depth write");
+	SystemData.depth = t;
+}
+
+PUBLIC void DA_SetPressure(pressure_t t)
+{
+	DPRINT(TAG, "Pressure write");
+	SystemData.pressure = t;
+}
+
 PUBLIC humidity_t DA_GetHumidity()
 {
 	DPRINT(TAG, "Humidity read");
@@ -67,6 +79,18 @@ PUBLIC temperature_t DA_GetTemperature()
 {
 	DPRINT(TAG, "Temp read");
 	return SystemData.temperature;
+}
+
+PUBLIC depth_t DA_GetDepth()
+{
+	DPRINT(TAG, "Depth read");
+	return SystemData.depth;
+}
+
+PUBLIC pressure_t DA_GetPressure()
+{
+	DPRINT(TAG, "Pressure read");
+	return SystemData.pressure;
 }
 
 PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId)

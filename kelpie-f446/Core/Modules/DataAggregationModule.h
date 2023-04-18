@@ -39,9 +39,8 @@ typedef struct SystemData_t{
 	humidity_t humidity;
 	temperature_t temperature;
 	PMBusData_t pmbusData;
+	depth_t depth;
 	pressure_t pressure;
-
-
 } SystemData_t;
 
 PUBLIC void DA_SetIMUQuaterion(float i, float j, float k, float real);
@@ -49,8 +48,12 @@ PUBLIC IMUData_t DA_GetIMUQuaterion();
 
 PUBLIC void DA_SetHumidity(humidity_t hum);
 PUBLIC void DA_SetTemperature(temperature_t t);
+PUBLIC void DA_SetDepth(depth_t t);
+PUBLIC void DA_SetPressure(pressure_t t);
 PUBLIC humidity_t DA_GetHumidity();
 PUBLIC temperature_t DA_GetTemperature();
+PUBLIC depth_t DA_GetDepth();
+PUBLIC pressure_t DA_GetPressure();
 
 PUBLIC void DA_SetThrusterValue(uint8_t thrusterId, pwm_t value);
 PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId);
