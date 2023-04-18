@@ -268,14 +268,14 @@ static void hal_hardwareReset(void) {
     if (imuInfo.Reset_Pin == -1) return;
 
     const TickType_t delay = 10 / portTICK_PERIOD_MS;
-
+/*
     // set the reset pin to high, then wait 10ms, then set it low, then wait 10ms, then set it high again
     HAL_GPIO_WritePin(imuInfo.Reset_Pin_Bank, imuInfo.Reset_Pin, GPIO_PIN_SET);
     vTaskDelay(delay);
     HAL_GPIO_WritePin(imuInfo.Reset_Pin_Bank, imuInfo.Reset_Pin, GPIO_PIN_RESET);
     vTaskDelay(delay);
     HAL_GPIO_WritePin(imuInfo.Reset_Pin_Bank, imuInfo.Reset_Pin, GPIO_PIN_SET);
-    vTaskDelay(delay);
+    vTaskDelay(delay);*/
 }
 
 static uint32_t hal_getTimeUs(sh2_Hal_t *self) {

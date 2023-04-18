@@ -8,6 +8,7 @@
 #include "NavigationModule.h"
 #include "NavigationTask.h"
 #include "SerialDebugDriver.h"
+#include "DataAggregationModule.h"
 #include "Adafruit_BNO080/IMUDriver.h"
 
 #define TAG "NAT"
@@ -29,49 +30,80 @@ PUBLIC void InitNavigationTask(void)
 {
 	NavigationTaskHandle = osThreadNew(NavigationTask, NULL, &NavigationTask_attributes);
 }
+
+
+PRIVATE result_t NavigationIMUInit()
+{
+	SerialDebug(TAG, "IMU Init Sequence Starting");
+	if(IMU_BeginI2C(0x4A,0)!= RESULT_OK)
+	{
+		SerialDebug(TAG, "Error with begin I2C");
+		return RESULT_ERR;
+	}
+	else
+	{
+		SerialDebug(TAG, "I2C successful");
+	}
+
+	if(enableReport(SH2_ROTATION_VECTOR)!= RESULT_OK)
+	{
+		SerialDebug(TAG, "Error with setting quaternion reports");
+		return RESULT_ERR;
+	}
+	else
+	{
+		SerialDebug(TAG, "Quaternion report set");
+	}
+	SerialDebug(TAG, "IMU init all successful");
+	return RESULT_OK;
+}
+
 PRIVATE void NavigationTask(void *argument)
 {
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "Navigation Task Starting...");
-	if(IMU_BeginI2C(0x4A,0)!= RESULT_OK)
-	{
-		SerialDebug(TAG, "Error with begin i2c");
-	}
-	else
-	{
-		SerialDebug(TAG, "GOOD 1");
-	}
-	if(enableReport(SH2_ROTATION_VECTOR)!= RESULT_OK)
-	{
-		SerialDebug(TAG, "Error with set reports");
-	}
-	else
-	{
-		SerialDebug(TAG, "GOOD 2");
-	}
+	result_t initRes = NavigationIMUInit();
 
 	sh2_SensorValue_t values;
 	for(;;)
 	{
 		cycleTick += TIMER_NAV_TASK;
 		osDelayUntil(cycleTick);
-		if (wasReset()) {
-		    SerialDebug(TAG, "sensor was reset ");
-		    enableReport(SH2_ROTATION_VECTOR);
-		  }
+
 		SerialDebug(TAG, "Navigation Task Loop");
+
+		// if init was unsuccessful, try again
+		if(initRes == RESULT_ERR)
+		{
+			SerialDebug(TAG, "Reattempting IMU init");
+			initRes = NavigationIMUInit();
+		}
+		// if init still unsuccessful try again next cycle
+		if(initRes == RESULT_ERR)
+		{
+			continue;
+		}
+
+		if (wasReset())
+		{
+		    SerialDebug(TAG, "Sensor was reset");
+		    enableReport(SH2_ROTATION_VECTOR);
+		}
+
 		if(getSensorEvent(&values))
 		{
-			SerialDebug(TAG, "SUCCESS!");
-			int32_t i = values.un.rotationVector.i*10000;
-			int32_t j = values.un.rotationVector.j*10000;
-			int32_t k = values.un.rotationVector.k*10000;
-			int32_t r = values.un.rotationVector.real*10000;
-			SerialDebug(TAG, "i:%d\tj:%d\tj:%d\tr:%d", i,j,k,r);
+			SerialDebug(TAG, "imu quat success");
+			float i = values.un.rotationVector.i;
+			float j = values.un.rotationVector.j;
+			float k = values.un.rotationVector.k;
+			float r = values.un.rotationVector.real;
+			SerialDebug(TAG, "i:%.6f\tj:%.6f\tj:%.6f\tr:%.6f", i,j,k,r);
+
+			DA_SetIMUQuaterion(i, j, k, r);
 		}
 		else
 		{
-			SerialDebug(TAG, "BAD!");
+			SerialDebug(TAG, "Error getting imu quaternion values");
 		}
 
 	}

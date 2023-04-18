@@ -37,4 +37,10 @@ PUBLIC void AAMod_AppendageCallback(uint8_t * data){
 	else if(state[0] == '1') AAMod_SetAppendageValue(1);
 	else AAMod_SetAppendageValue(0);
 	*/
+
+	/*
+	 * int8_t state = (int8_t) data[0];
+	 * if (state != -1 && state != 0 && state != 1) SerialDebug(TAG, "Incorrect appendage state: %d", state);
+	 * AAMod_SetAppendageValue(state);
+	 */
 }
