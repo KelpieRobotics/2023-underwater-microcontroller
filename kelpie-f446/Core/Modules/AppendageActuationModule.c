@@ -8,6 +8,8 @@
 #include "AppendageActuationModule.h"
 #include "DataAggregationModule.h"
 #include "UserTypes.h"
+#include <UserUtils.h>
+#include "PiCommsDriver.h"
 
 #define TAG "AAM"
 /*
@@ -29,18 +31,36 @@ PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
 		DA_SetAppendageState(CLAW_R, GPIO_PIN_RESET);
 	}
 }
-
 PUBLIC void AAMod_AppendageCallback(uint8_t * data){
-	/*
-	char * state = (char *)data;
-	if(state[0] == 'F') AAMod_SetAppendageValue(-1);
-	else if(state[0] == '1') AAMod_SetAppendageValue(1);
-	else AAMod_SetAppendageValue(0);
-	*/
+	int8_t intData = (int)data[0];
+	AAMod_SetAppendageValue((claw_state_t)intData);
+	PiComms_Send("#ACK:",TAG,"!");
+}
 
-	/*
-	 * int8_t state = (int8_t) data[0];
-	 * if (state != -1 && state != 0 && state != 1) SerialDebug(TAG, "Incorrect appendage state: %d", state);
-	 * AAMod_SetAppendageValue(state);
-	 */
+
+/*
+ * converts the input to servo pwm value, then calls DA_SetPWMServoValue
+ */
+PUBLIC void AAMod_SetServoValue(ServoID_t id, uint8_t input){
+	SerialDebug(TAG, " Setting servo ",id," to input ",input);
+	DA_SetPWMServoValue(id, MapInputToPWM(input, GetServoScalePWM(id), GetServoMinPWM(id)));
+}
+//takes uint8_t* and calls MCMod_SetThrusterValue with uint8_t id, uint8_t input
+PUBLIC void AAMod_ServoCallback(uint8_t *data){
+	AAMod_SetServoValue(data[0], data[1]);
+	PiComms_Send("#ACK:",TAG,"!");
+}
+
+
+/*
+ * converts the input to light pwm value, then calls DA_SetLightValue
+ */
+PUBLIC void AAMod_SetLightValue(uint8_t input){
+	SerialDebug(TAG, " Setting light to input ",input);
+	DA_SetLightValue(MapInputToPWM(input, LIGHT_PWM_SCALE, LIGHT_MIN_VALUE));
+}
+//takes uint8_t* and calls MCMod_SetLightValue with uint8_t input
+PUBLIC void AAMod_LightCallback(uint8_t *data){
+	AAMod_SetLightValue(data[0]);
+	PiComms_Send("#ACK:",TAG,"!");
 }

@@ -12,5 +12,6 @@
 
 PUBLIC result_t safetySensorsInit();
 PUBLIC result_t updateSafetySensorRoutine();
+PUBLIC void SMModLeakSensorERR();
 
 #endif /* MODULES_SAFETYMANAGERMODULE_H_ */

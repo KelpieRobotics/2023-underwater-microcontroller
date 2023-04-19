@@ -49,49 +49,13 @@ PRIVATE void MovementControlTask(void *argument)
 	uint32_t cycleTick = osKernelGetTickCount();
 
 	SerialDebug(TAG, "Movement Control Starting...");
-	ThrusterDriverInit();
+	PWMDriverThrustersInit();
 
-	while(thrusterID < NUM_THRUSTERS){
-		DA_SetThrusterValue(thrusterID++, GetThrusterInitValue());
-	}
-  
-	/*
-	result_t restest = SetThrusterPWM(LIGHTMODULE, 1100);
-	vTaskDelay(1000/ portTICK_PERIOD_MS);
-	SetThrusterPWM(LIGHTMODULE, 1500);*/
-
-	SetLightModulePWM(1100);
-	vTaskDelay(1000/ portTICK_PERIOD_MS);
-	SetLightModulePWM(1900);
-
-	SetServoPWM(SERVO1, 1500);
-	SetServoPWM(SERVO2, 1500);
-	SetServoPWM(SERVO3, 1500);
-	vTaskDelay(5000/ portTICK_PERIOD_MS);
-
-	for(int i= 0; i<3; i++)
-	{
-		SetServoPWM(SERVO1, 500);
-		SetServoPWM(SERVO2, 500);
-		SetServoPWM(SERVO3, 500);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-		SetServoPWM(SERVO1, 2495);
-		SetServoPWM(SERVO2, 2495);
-		SetServoPWM(SERVO3, 2495);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-	}
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
 		SerialDebug(TAG, "Movement Control Loop");
-
-		// TEMP
-		AAMod_SetAppendageValue(CLAW_OPEN);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-		AAMod_SetAppendageValue(CLAW_CLOSE);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-		AAMod_SetAppendageValue(CLAW_OPEN);
 
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;

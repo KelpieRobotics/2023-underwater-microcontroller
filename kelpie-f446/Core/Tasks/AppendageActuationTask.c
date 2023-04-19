@@ -10,6 +10,7 @@
 #include "AppendageActuationModule.h"
 #include "DataAggregationModule.h"
 #include "SerialDebugDriver.h"
+#include "PWMDriver.h"
 
 //TEMP
 #include "HBridgeDriver.h"
@@ -43,11 +44,12 @@ PUBLIC void InitAppendageActuationTask(void)
  */
 PRIVATE void AppendageActuationTask(void *argument)
 {
-	uint8_t servoID;
+	uint8_t id;
 	uint32_t cycleTick = osKernelGetTickCount();
 
 	SerialDebug(TAG, "Actuator Control Starting...");
-	ServoDriverInit();
+	HBridgeDriverInit();
+	PWMDriverAppendagesInit();
 \
 
 	for(;;)
@@ -57,12 +59,22 @@ PRIVATE void AppendageActuationTask(void *argument)
 		SerialDebug(TAG, "Actuator Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
-		servoID = 0;
+		id = 0;
 
-		while(servoID < NUMBER_SERVOS){
-			SetServoAngle(servoID, DA_GetAppendageState(servoID));
-			servoID++;
+		while(id < NUM_HBRIDGE){
+			SetHBridgeValue(id, DA_GetAppendageState(id));
+			id++;
 		}
+
+
+		id = 0;
+
+		while(id < NUM_SERVOS){
+			SetServoPWM(id, DA_GetPWMServoValue(id));
+			id++;
+		}
+
+		SetLightModulePWM(DA_GetLightValue());
 
 	}
 }

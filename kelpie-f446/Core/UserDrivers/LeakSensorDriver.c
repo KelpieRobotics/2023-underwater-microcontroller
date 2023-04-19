@@ -9,11 +9,14 @@
 #include "SerialDebugDriver.h"
  #include "InteruptModule.h"
  #include "main.h"
+#include "SafetyManagerModule.h"
+
+#define TAG "LSD"
 
 
 PRIVATE void LeakSensorIntCallback(){
-	SerialPrintln("\tLeakSensorIntCallback");
-
+	SerialDebug(TAG, "LeakDetected");
+	SMModLeakSensorERR();
 }
 
 /**

@@ -30,26 +30,37 @@ PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high);
 
 PRIVATE ICommsErr_t ParseMessageToInts(uint8_t * rawMsg, uint16_t rawMsgLen, uint8_t * intPayload); // raw messages come in ascii encoded hex, all messages are in bytes (8bits) hence each pair of chars represents a byte of data
 
-#define NUM_MESSAGES 2
+#define NUM_MESSAGES 4
 
 struct indexMap msgIndexMap[NUM_MESSAGES];
 /* NOTE: Message length is the number of characters that make up the data payload in raw ascii encoded hex
  * 		(message with payload 020E has 2 bytes of data but message len is 4 bytes)
- * +----------------------------+---------------+-------------------------------------------------------+
- * |  Message Name				|  Message len	|Payload breakdown	(after converting ascii to int)		|
- * +----------------------------+---------------+-------------------------------------------------------+
- * |MCMod_ThrusterCallback		| 4 char		| byte 0 - motor id   									|
- * |							|				| byte 1 - motor value									|
- * +----------------------------+---------------+-------------------------------------------------------+
- * |							|				|														|
- * |							|				|														|
- * +----------------------------+---------------+-------------------------------------------------------+
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
+ * |  Message Name				| Message ID (Hex)	|  Message len	|Payload breakdown	(after converting ascii to int)		|
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
+ * |MCMod_ThrusterCallback		|	000A			| 4 char		| byte 0 - motor id: 0-7 								|
+ * |							|					|				| byte 1 - motor pwm value: 0-255						|
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
+ * |AAMod_AppendageCallback		|	000B			| 2 char		| byte 0 - appendage  state id: -1 - 1					|
+ * |							|					|				|														|
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
+ * |AAMod_ServoCallback			|	000C			| 4 char		| byte 0 - servo id: 0-3								|
+ * |							|					|				| byte 1 - servo pwm value:	0-255						|
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
+ * |AAMod_SetLightValue			|	000D			| 2 char		| byte 0 - light pwm value:	0-255						|
+ * |							|					|				|														|
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
+ * |							|					|				|														|
+ * |							|					|				|														|
+ * +----------------------------+-------------------+---------------+-------------------------------------------------------+
  */
 ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
 {
-		//ID,	bytes,	callback				//UPDATE NUM_MESSAGES WHEN CALLBACKS ARE ADDED
-		{42, 	4, 		&MCMod_ThrusterCallback},
-		{15,	1,		&AAMod_AppendageCallback},
+		//ID,	bytes,	callback						//UPDATE NUM_MESSAGES WHEN CALLBACKS ARE ADDED ---------------------------------------------------------- !
+		{10, 	4, 		&MCMod_ThrusterCallback},
+		{11,	2,		&AAMod_AppendageCallback},
+		{12, 	4, 		&AAMod_ServoCallback},
+		{13,	2,		&AAMod_SetLightValue},
 };
 
 // Helper function for converting a single char (hex) into int
@@ -67,7 +78,7 @@ PRIVATE uint8_t hex2int(char ch)
 // Helper function for parsing the message data payload. converts and combines char representing nybbles into integer bytes
 PRIVATE ICommsErr_t ParseMessageToInts(uint8_t * rawMsg, uint16_t rawMsgLen, uint8_t * intPayload)
 {
-	if(rawMsgLen % 2 == 1)
+	if((rawMsgLen & 0x01) == 1)
 	{
 		return ICOMMS_INVALID_MSG_LEN;
 	}
@@ -103,6 +114,7 @@ PUBLIC void InitInternalCommsModule(){
 	PiComms_Init();
 	MakeInternalCommsMapping();
 	SortICommsMsg(msgIndexMap, 0, NUM_MESSAGES-1);
+	SerialDebug(TAG, " Init completed ");
 }
 
 //calls message id's callback and passes in data
@@ -110,10 +122,12 @@ PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
 	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msg.messageId);
 	if(msgIndex < 0){
 		SerialPrintln("#ERR: InternalComms msgId %d not found", msg.messageId);
+		PiComms_Send("#ERR:",TAG,",NoMsgId!");
 		return RESULT_ERR;
 	}
 	if(msgCallbackLookup[msgIndex].dataLen != msg.dataLen){
 		SerialPrintln("#ERR: InternalCommsMessageCallback message dataLen incorrect length. Given %d, Expected %d, msgIndex: %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen, msgIndex);
+		PiComms_Send("#ERR:",TAG,",WrongMsgLen!");
 		return RESULT_ERR;
 	}
 	uint8_t intPayload[128]; // ascii encoded hex converted int8

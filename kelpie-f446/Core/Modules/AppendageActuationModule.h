@@ -21,4 +21,10 @@ typedef enum {
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state);
 PUBLIC void AAMod_AppendageCallback(uint8_t * data);
 
+PUBLIC void AAMod_SetServoValue(ServoID_t id, uint8_t input);
+PUBLIC void AAMod_ServoCallback(uint8_t *data);
+
+PUBLIC void AAMod_SetLightValue(uint8_t input);
+PUBLIC void AAMod_LightCallback(uint8_t *data);
+
 #endif /* MODULES_APPENDAGEACTUATIONMODULE_H_ */

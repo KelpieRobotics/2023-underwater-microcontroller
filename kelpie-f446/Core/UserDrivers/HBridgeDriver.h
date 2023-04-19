@@ -11,7 +11,7 @@
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
 
-#define NUMBER_SERVOS 2
+#define NUM_HBRIDGE 2
 
 typedef enum {
 	CLAW_L = 0,
@@ -23,13 +23,13 @@ typedef struct ServoInfo{
 	GPIO_PinState neutralPinValue; // pin value that sets servo to position "zero"
 	uint16_t GPIO_Pin;
 	GPIO_TypeDef *GPIO_Bank;
-} ServoInfo_t;
+} HBridgeInfo_t;
 
 
 
 
-PUBLIC void SetServoAngle(ServoID_t servoID, GPIO_PinState state);
-PUBLIC void ServoDriverInit();
+PUBLIC void SetHBridgeValue(ServoID_t servoID, GPIO_PinState state);
+PUBLIC void HBridgeDriverInit();
 PUBLIC pwm_t ServoDriverInputToPWM(uint8_t id, uint8_t input);
 
 #endif /* USERDRIVERS_HBRIDGEDRIVER_H_ */

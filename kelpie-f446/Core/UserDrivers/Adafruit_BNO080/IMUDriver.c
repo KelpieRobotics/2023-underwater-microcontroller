@@ -310,9 +310,5 @@ static void sensorHandler(void *cookie, sh2_SensorEvent_t *event) {
 }
 
 static uint16_t min(uint16_t a, uint16_t b) {
-    if (a < b) {
-        return a;
-    } else {
-        return b;
-    }
+    return a <= b ? a : b;
 }
