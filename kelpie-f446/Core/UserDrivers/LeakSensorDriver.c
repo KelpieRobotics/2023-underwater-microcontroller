@@ -16,6 +16,10 @@ PRIVATE void LeakSensorIntCallback(){
 
 }
 
+/**
+ * @brief: Initializes the leak sensor interrupt.
+ * @return: Result of the initiation.
+ */
 PUBLIC result_t InitLeakSensor(){
 	int8_t pinId = GetPinInteruptLookUpIndex(LEAK_EXTI_Pin);
 	if(pinId < 0) return RESULT_ERR;

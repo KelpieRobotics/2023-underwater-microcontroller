@@ -23,7 +23,7 @@
 #define SENSOR_TIMEOUT 500 // millis
 
 /*
- * @summary:
+ * @summary: Return type of sensor status, for identifying errors.
  */
 typedef enum {
     SHT30D_OK = 0,

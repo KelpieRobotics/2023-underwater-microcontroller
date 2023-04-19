@@ -7,12 +7,16 @@
 
 #include "NavigationModule.h"
 #include "NavigationTask.h"
+#include "MS5837Driver.h"
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
 #include "Adafruit_BNO080/IMUDriver.h"
 #include "MS5837Driver.h"
 
 #define TAG "NAT"
+
+pressure_t pressure = 0;
+depth_t depth = 0;
 
 // FreeRTOS Configuration
 #define STACK_SIZE 1024*16
@@ -30,6 +34,10 @@ const osThreadAttr_t NavigationTask_attributes = {
 PUBLIC void InitNavigationTask(void)
 {
 	NavigationTaskHandle = osThreadNew(NavigationTask, NULL, &NavigationTask_attributes);
+    if (MS5837_init() != RESULT_OK)
+    {
+    	SerialPrintln("Did not initialize MS5837 correctly.");
+    }
 }
 
 
