@@ -9,7 +9,7 @@
 #define MODULES_MOVEMENTCONTROLMODULE_H_
 
 #include "UserTypes.h"
-#include "ThrusterDriver.h"
+#include "PWMDriver.h"
 
 PUBLIC void MCMod_SetThrusterValue(ThrusterID_t id, uint8_t input);
 PRIVATE pwm_t MapInputToPWM(uint8_t input);

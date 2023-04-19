@@ -399,7 +399,7 @@ PUBLIC result_t MS5837_getValues (pressure_t *pressure, depth_t *depth)
 	if (ret != RESULT_OK)
 	{
 		SerialPrintln("Failed to read values from MS5837.");
-		return RESULT_ERR;
+		return ret;
 	}
 
 	*pressure = MS5837_getPressure(1.0);

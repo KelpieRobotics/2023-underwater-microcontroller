@@ -5,10 +5,14 @@
  *      Author: mingy
  */
 
+#include <HBridgeDriver.h>
 #include "AppendageActuationTask.h"
+#include "AppendageActuationModule.h"
 #include "DataAggregationModule.h"
-#include "ServoDriver.h"
 #include "SerialDebugDriver.h"
+
+//TEMP
+#include "HBridgeDriver.h"
 
 #define TAG "AAT"
 // FreeRTOS Configuration
@@ -44,6 +48,7 @@ PRIVATE void AppendageActuationTask(void *argument)
 
 	SerialDebug(TAG, "Actuator Control Starting...");
 	ServoDriverInit();
+\
 
 	for(;;)
 	{

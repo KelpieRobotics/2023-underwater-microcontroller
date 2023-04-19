@@ -45,6 +45,32 @@ typedef struct
 
 } ThrusterInfo_t;
 
+typedef enum {
+	SERVO1,
+	SERVO2,
+	SERVO3
+} PWMServoID_t;
+
+typedef struct
+{
+	PWMServoID_t id;
+	pwm_t absMinPWM; // absolute min and max
+	pwm_t absMaxPWM;
+
+	pwm_t zeroPWM; // pwm for zero movement
+	pwm_t safeMinPWM; // safe range for operation
+	pwm_t safeMaxPWM;
+
+	double counterValuePerPWM;
+	uint8_t timerChannel; // hardware define
+	TIM_HandleTypeDef * timerHandler;
+	volatile uint32_t * timerReg;
+
+
+} PWMServoInfo_t;
+
+PUBLIC result_t SetLightModulePWM(pwm_t pwm);
+PUBLIC result_t SetServoPWM(PWMServoID_t SID, pwm_t pwm);
 PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm);
 PUBLIC result_t ThrusterDriverInit();
 PUBLIC pwm_t GetThrusterInitValue();

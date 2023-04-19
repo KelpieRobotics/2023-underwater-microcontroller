@@ -5,7 +5,7 @@
  *      Author: mingy, eric
  */
 
-#include "ServoDriver.h"
+#include <HBridgeDriver.h>
 #include "SerialDebugDriver.h"
 
 extern TIM_HandleTypeDef htim2;
@@ -21,8 +21,8 @@ extern TIM_HandleTypeDef htim2;
 const ServoInfo_t servoLookup[NUMBER_SERVOS] =
 {
 		// IDs (Lookup Index)		neutralPinValue			GPIO_Pin			GPIO Bank
-		{CLAW_L,					GPIO_PIN_RESET,			GPIO_PIN_14,		GPIOB},
-		{CLAW_R,					GPIO_PIN_RESET,			GPIO_PIN_15, 		GPIOB}
+		{CLAW_L,					GPIO_PIN_RESET,			GPIO_PIN_10,		GPIOC},
+		{CLAW_R,					GPIO_PIN_RESET,			GPIO_PIN_5, 		GPIOC}
 };
 
 // converts target angle into pwm value, checks if the pwm value is within range, send the pwm to the servo

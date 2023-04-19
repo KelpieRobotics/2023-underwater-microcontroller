@@ -18,3 +18,7 @@ latex/
 #IDE-specific
 .vscode
 .idea
+kelpie-f446/cmake-build-debug/
+kelpie-f446/cmake-build-debug/*
+kelpie-f446/CMakeLists.txt
+kelpie-f446/CMakeLists_template.txt

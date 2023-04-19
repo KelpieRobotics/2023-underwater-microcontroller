@@ -8,9 +8,9 @@
 #ifndef MODULES_APPENDAGEACTUATIONMODULE_H_
 #define MODULES_APPENDAGEACTUATIONMODULE_H_
 
+#include <HBridgeDriver.h>
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
-#include "ServoDriver.h"
 
 typedef enum {
 	CLAW_OPEN = -1,

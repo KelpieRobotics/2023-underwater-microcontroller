@@ -13,7 +13,7 @@
 #define TAG "SMT"
 
 // FreeRTOS Configuration
-#define STACK_SIZE 128*4
+#define STACK_SIZE 1024*2
 #define SAFETY_TASK_PRIORITY (osPriority_t) osPriorityHigh
 #define TIMER_SAFETY_TASK 1000UL
 
@@ -39,7 +39,7 @@ PRIVATE void SafetyTask(void *argument)
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "Safety Manager Task Starting...");
 
-	InitLeakSensor();
+	safetySensorsInit();
 
 	for(;;)
 	{
@@ -47,6 +47,6 @@ PRIVATE void SafetyTask(void *argument)
 		osDelayUntil(cycleTick);
 		SerialDebug(TAG, "Safety loop");
 
-
+		updateSafetySensorRoutine();
 	}
 }

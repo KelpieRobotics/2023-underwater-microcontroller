@@ -73,8 +73,6 @@ void Error_Handler(void);
 #define PWM_Servo1_GPIO_Port GPIOA
 #define PWM_Servo2_Pin GPIO_PIN_7
 #define PWM_Servo2_GPIO_Port GPIOA
-#define CLAW_RX_Pin GPIO_PIN_5
-#define CLAW_RX_GPIO_Port GPIOC
 #define PWM_Servo3_Pin GPIO_PIN_0
 #define PWM_Servo3_GPIO_Port GPIOB
 #define PWM_LightModule_Pin GPIO_PIN_1
@@ -104,8 +102,6 @@ void Error_Handler(void);
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define CLAW_TX_Pin GPIO_PIN_10
-#define CLAW_TX_GPIO_Port GPIOC
 #define PI_RX_Pin GPIO_PIN_11
 #define PI_RX_GPIO_Port GPIOC
 #define IMU_SDA_Pin GPIO_PIN_12
