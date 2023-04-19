@@ -41,7 +41,7 @@ struct indexMap msgIndexMap[NUM_MESSAGES];
  * |MCMod_ThrusterCallback		|	000A			| 4 char		| byte 0 - motor id: 0-7 								|
  * |							|					|				| byte 1 - motor pwm value: 0-255						|
  * +----------------------------+-------------------+---------------+-------------------------------------------------------+
- * |AAMod_AppendageCallback		|	000B			| 2 char		| byte 0 - appendage  state id: -1 - 1					|
+ * |AAMod_AppendageCallback		|	000B			| 2 char		| byte 0 - appendage state: -1 open, 0 idle, 1 close	|
  * |							|					|				|														|
  * +----------------------------+-------------------+---------------+-------------------------------------------------------+
  * |AAMod_ServoCallback			|	000C			| 4 char		| byte 0 - servo id: 0-3								|
