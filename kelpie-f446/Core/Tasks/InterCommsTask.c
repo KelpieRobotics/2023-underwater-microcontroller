@@ -43,11 +43,11 @@ PUBLIC void InitInternalCommsTask(void)
 PRIVATE void ICommsTransmitRoutine()
 {
 	IMUData_t imudata = DA_GetIMUQuaterion();
-	PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
+	//PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
 
 	humidity_t humidity = DA_GetHumidity();
 	temperature_t temperature = DA_GetTemperature();
-	PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
+	//PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
 
 
 

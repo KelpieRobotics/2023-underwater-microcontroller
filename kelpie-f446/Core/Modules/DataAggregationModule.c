@@ -6,6 +6,7 @@
  */
 
 #include "DataAggregationModule.h"
+#include "PWMDriver.h"
 #include "SerialDebugDriver.h"
 
 //#define ENABLE_DEBUG
@@ -18,10 +19,6 @@
 #define TAG "DAM"
 
 SystemData_t SystemData;
-
-void DataAggregatorInit()
-{
-}
 
 PUBLIC void DA_SetThrusterValue(uint8_t thrusterId, pwm_t value)
 {
@@ -127,3 +124,11 @@ PUBLIC IMUData_t DA_GetIMUQuaterion()
 	return SystemData.imuData;
 }
 
+void DataAggregatorInit()
+{
+	// Thruster arming value initialization
+	for (int id = 0; id < NUM_THRUSTERS; id++)
+	{
+		DA_SetThrusterValue(id, GetThrusterZeroValue(id));
+	}
+}

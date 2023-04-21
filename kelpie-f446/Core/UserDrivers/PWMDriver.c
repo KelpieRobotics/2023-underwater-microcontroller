@@ -25,6 +25,11 @@ ThrusterInfo_t thrusterLookup[NUM_THRUSTERS] =
 		{THRUSTER8, 	THRUSTER_ABS_MIN_VALUE,		THRUSTER_ABS_MAX_VALUE,		THRUSTER_INIT_VALUE,		THRUSTER_SAFE_MIN_VALUE,		THRUSTER_SAFE_MAX_VALUE,		THRUSTER_PWM_SCALE,		THRUSTER_COUNTER_TO_PWM_VALUE,				TIM_CHANNEL_4,			&htim1,			&(TIM1->CCR4)}
 };
 
+PUBLIC pwm_t GetThrusterZeroValue(ThrusterID_t thrusterID)
+{
+	return thrusterLookup[thrusterID].zeroPWM;
+}
+
 #define LIGHTMODULE 0
 PWMServoInfo_t pwmServoLookup[NUM_SERVOS] =
 {

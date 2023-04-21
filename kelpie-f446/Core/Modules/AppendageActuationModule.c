@@ -34,7 +34,7 @@ PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
 PUBLIC void AAMod_AppendageCallback(uint8_t * data){
 	int8_t intData = (int)data[0];
 	AAMod_SetAppendageValue((claw_state_t)intData);
-	PiComms_Send("#ACK:",TAG,"!");
+	PiComms_Send("#ACK: %s !", TAG);
 }
 
 
@@ -42,13 +42,13 @@ PUBLIC void AAMod_AppendageCallback(uint8_t * data){
  * converts the input to servo pwm value, then calls DA_SetPWMServoValue
  */
 PUBLIC void AAMod_SetServoValue(ServoID_t id, uint8_t input){
-	SerialDebug(TAG, " Setting servo ",id," to input ",input);
+	SerialDebug(TAG, " Setting servo %d to input %d", id, input);
 	DA_SetPWMServoValue(id, MapInputToPWM(input, GetServoScalePWM(id), GetServoMinPWM(id)));
 }
 //takes uint8_t* and calls MCMod_SetThrusterValue with uint8_t id, uint8_t input
 PUBLIC void AAMod_ServoCallback(uint8_t *data){
 	AAMod_SetServoValue(data[0], data[1]);
-	PiComms_Send("#ACK:",TAG,"!");
+	PiComms_Send("#ACK: %s !", TAG);
 }
 
 

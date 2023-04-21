@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef htim3;
 // FreeRTOS Configuration
 #define STACK_SIZE 128*8
 #define MOVE_CTRL_TASK_PRIORITY (osPriority_t) osPriorityRealtime2
-#define TIMER_MOVE_CTRL_TASK 500UL
+#define TIMER_MOVE_CTRL_TASK 100UL
 
 
 osThreadId_t MovementControlTaskHandle;
@@ -49,17 +49,19 @@ PRIVATE void MovementControlTask(void *argument)
 	uint32_t cycleTick = osKernelGetTickCount();
 
 	SerialDebug(TAG, "Movement Control Starting...");
+	vTaskDelay(2000/ portTICK_PERIOD_MS);
 	PWMDriverThrustersInit();
-
+	vTaskDelay(2000/ portTICK_PERIOD_MS);
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
-		SerialDebug(TAG, "Movement Control Loop");
+		//SerialDebug(TAG, "Movement Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;
 		while(thrusterID < NUM_THRUSTERS){
+			//SerialDebug(TAG, "PWM set thruster %d: %d", thrusterID, DA_GetThrusterValue(thrusterID));
 			SetThrusterPWM(thrusterID, DA_GetThrusterValue(thrusterID));
 			thrusterID++;
 		}

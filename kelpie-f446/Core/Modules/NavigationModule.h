@@ -13,5 +13,6 @@
 
 PUBLIC result_t NAMod_SensorsInit();
 PUBLIC result_t NAMod_SensorRoutine();
+PRIVATE result_t NavigationIMUInit();
 
 #endif /* MODULES_NAVIGATIONMODULE_H_ */

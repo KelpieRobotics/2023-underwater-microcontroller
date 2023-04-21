@@ -30,7 +30,7 @@ PUBLIC result_t updateSafetySensorRoutine()
 	if(SHT30D_GetValues(&shtTemp, &shtHum) == RESULT_ERR)	//THIS COMPARISON IS BETWEEN 2 DIFFERENT ERROR TYPES. I THINK THIS WAS TESTED, SO I WILL ASK THE AUTHOR TO TAKE A LOOK - Eric E
 	{
 		SerialDebug(TAG, "Error getting SHT30D values");
-		PiComms_Send("#ERR:",TAG,"ErrorGettingSHT30DValues!");
+		PiComms_Send("#ERR: %s ErrorGettingSHT30DValues!");
 		return RESULT_ERR;
 	}
 
@@ -45,5 +45,5 @@ PUBLIC result_t updateSafetySensorRoutine()
  */
 PUBLIC void SMModLeakSensorERR(){
 	SerialDebug(TAG, "LeakDetected");
-	PiComms_Send("#ERR:",TAG,",LeakDetected!");
+	PiComms_Send("#ERR: %s ,LeakDetected!");
 }

@@ -12,7 +12,7 @@
  */
 PUBLIC pwm_t MapInputToPWM(uint8_t input, const double scale, pwm_t minValue){
 	//SerialPrintln("\tMapInputToPWM: %d",THRUSTER_SAFE_MIN_VALUE + (pwm_t)(PWM_SCALE * input));
-	return minValue + (pwm_t)(scale * input);
+	return minValue + (pwm_t)(input * scale);
 }
 
 

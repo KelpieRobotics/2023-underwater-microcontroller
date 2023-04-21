@@ -14,11 +14,11 @@
 #define NUM_THRUSTERS 8
 #define THRUSTER_ABS_MIN_VALUE 1000		//this many need to be updated if we are using different thrusters
 #define THRUSTER_ABS_MAX_VALUE 2000//I THOUGHT THE RANGE WAS 1100-1900. SAFE VALUES ARE USED, SO IT ISN'T CRITICAL  - ERIC E
-#define THRUSTER_SAFE_MIN_VALUE 1250
-#define THRUSTER_SAFE_MAX_VALUE 1750
+#define THRUSTER_SAFE_MIN_VALUE 1100
+#define THRUSTER_SAFE_MAX_VALUE 1900
 #define THRUSTER_INIT_VALUE 1500
 #define THRUSTER_COUNTER_TO_PWM_VALUE 1/0.0381
-#define THRUSTER_PWM_SCALE (THRUSTER_SAFE_MAX_VALUE-THRUSTER_SAFE_MIN_VALUE)/255
+#define THRUSTER_PWM_SCALE (THRUSTER_SAFE_MAX_VALUE-THRUSTER_SAFE_MIN_VALUE)/255.0
 
 #define NUM_SERVOS 3
 #define SERVO_SAFE_MIN_VALUE 500		//this many need to be updated if we are using different thrusters
@@ -55,7 +55,7 @@ typedef struct
 	pwm_t safeMinPWM; // safe range for operation
 	pwm_t safeMaxPWM;
 
-	pwm_t scalePWM;		//(safeMaxPWM - safeMinPWM)/255			safeMinPWM + 0-255 * scalePWM   converts uint8_t to pwm value
+	float scalePWM;		//(safeMaxPWM - safeMinPWM)/255			safeMinPWM + 0-255 * scalePWM   converts uint8_t to pwm value
 
 	double counterValuePerPWM;
 	uint8_t timerChannel; // hardware define
@@ -91,6 +91,7 @@ typedef struct
 
 } PWMServoInfo_t;
 
+PUBLIC pwm_t GetThrusterZeroValue(ThrusterID_t thrusterID);
 PUBLIC result_t SetLightModulePWM(pwm_t pwm);
 PUBLIC result_t SetServoPWM(PWMServoID_t SID, pwm_t pwm);
 PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm);

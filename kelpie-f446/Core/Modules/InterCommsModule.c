@@ -101,6 +101,7 @@ PRIVATE void MakeInternalCommsMapping(){
 //binary search for message by id
 PRIVATE int8_t binSearch(struct indexMap arr[], uint8_t l, uint8_t r, uint8_t msgId)
 {
+	if (arr[r].id == msgId) return arr[r].index;
     if (r >= l) {
         int8_t mid = l + ((r - l)>>1);
         if (arr[mid].id == msgId) return arr[mid].index;
@@ -122,12 +123,12 @@ PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
 	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msg.messageId);
 	if(msgIndex < 0){
 		SerialPrintln("#ERR: InternalComms msgId %d not found", msg.messageId);
-		PiComms_Send("#ERR:",TAG,",NoMsgId!");
+		PiComms_Send("#ERR: %s ,NoMsgId!", TAG);
 		return RESULT_ERR;
 	}
 	if(msgCallbackLookup[msgIndex].dataLen != msg.dataLen){
 		SerialPrintln("#ERR: InternalCommsMessageCallback message dataLen incorrect length. Given %d, Expected %d, msgIndex: %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen, msgIndex);
-		PiComms_Send("#ERR:",TAG,",WrongMsgLen!");
+		PiComms_Send("#ERR: %s ,WrongMsgLen!", TAG);
 		return RESULT_ERR;
 	}
 	uint8_t intPayload[128]; // ascii encoded hex converted int8
