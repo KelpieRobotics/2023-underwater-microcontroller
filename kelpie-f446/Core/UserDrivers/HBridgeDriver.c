@@ -11,7 +11,7 @@
 extern TIM_HandleTypeDef htim2;
 //extern HAL_ADC_HandleTypeDef hadc1;
 
-
+#define TAG "HBD"
 
 /*********************************************************************************
  *
@@ -27,7 +27,9 @@ const HBridgeInfo_t hBridgeLookup[NUM_HBRIDGE] =
 
 // converts target angle into pwm value, checks if the pwm value is within range, send the pwm to the servo
 // NOTE: it is the responsiblity of the module/user/appliction to updates the value in data aggregator, driver does not update the data aggr
-PUBLIC void SetHBridgeValue(ServoID_t servoID, GPIO_PinState state){
+PUBLIC void SetHBridgeValue(ServoID_t servoID, GPIO_PinState state)
+{
+	SerialDebug(TAG, "ID: %d State: %d", servoID, state);
 	HAL_GPIO_WritePin(hBridgeLookup[servoID].GPIO_Bank, hBridgeLookup[servoID].GPIO_Pin, state);
 }
 

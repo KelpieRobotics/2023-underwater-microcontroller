@@ -60,7 +60,7 @@ ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
 		{10, 	4, 		&MCMod_ThrusterCallback},
 		{11,	2,		&AAMod_AppendageCallback},
 		{12, 	4, 		&AAMod_ServoCallback},
-		{13,	2,		&AAMod_SetLightValue},
+		{13,	2,		&AAMod_LightCallback},
 };
 
 // Helper function for converting a single char (hex) into int

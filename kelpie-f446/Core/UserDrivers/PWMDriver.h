@@ -27,12 +27,12 @@
 #define SERVO_SAFE_MAX_VALUE 2495
 #define SERVO_INIT_VALUE 1500
 #define SERVO_COUNTER_TO_PWM_VALUE 1/0.0381
-#define SERVO_PWM_SCALE (SERVO_SAFE_MAX_VALUE-SERVO_SAFE_MIN_VALUE)/255
+#define SERVO_PWM_SCALE (SERVO_SAFE_MAX_VALUE-SERVO_SAFE_MIN_VALUE)/255.0
 
 #define LIGHT_MIN_VALUE 1100		//this many need to be updated if we are using different lights
 #define LIGHT_MAX_VALUE 1900
 #define LIGHT_COUNTER_TO_PWM_VALUE 1/0.0381
-#define LIGHT_PWM_SCALE (LIGHT_MIN_VALUE-LIGHT_MAX_VALUE)/255
+#define LIGHT_PWM_SCALE (LIGHT_MAX_VALUE-LIGHT_MIN_VALUE)/255.0
 
 typedef enum {
 	THRUSTER1,
@@ -81,7 +81,7 @@ typedef struct
 	pwm_t safeMinPWM; // safe range for operation
 	pwm_t safeMaxPWM;
 
-	pwm_t scalePWM;		//(safeMaxPWM - safeMinPWM)/255			safeMinPWM + 0-255 * scalePWM   converts uint8_t to pwm value
+	float scalePWM;		//(safeMaxPWM - safeMinPWM)/255			safeMinPWM + 0-255 * scalePWM   converts uint8_t to pwm value
 
 	double counterValuePerPWM;
 	uint8_t timerChannel; // hardware define

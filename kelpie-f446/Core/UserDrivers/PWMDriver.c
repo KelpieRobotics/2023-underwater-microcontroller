@@ -8,6 +8,9 @@
 #include "PWMDriver.h"
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
+
+#define TAG "PWM"
+
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim8;
@@ -34,9 +37,9 @@ PUBLIC pwm_t GetThrusterZeroValue(ThrusterID_t thrusterID)
 PWMServoInfo_t pwmServoLookup[NUM_SERVOS] =
 {
 		// ID			ABS MIN						ABS MAX						ZERO						SAFE MIN					SAFE MAX 						SCALE					COUNTER TO PWM VALUE				TIMER CHANNEL		TIMER HANDLER		TIMER REG
-		{SERVO1, 		SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,		SERVO_INIT_VALUE,			SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,			LIGHT_PWM_SCALE,		SERVO_COUNTER_TO_PWM_VALUE,			TIM_CHANNEL_1,			&htim3,			&(TIM3->CCR1)},
-		{SERVO2, 		SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,		SERVO_INIT_VALUE,			SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,			LIGHT_PWM_SCALE,		SERVO_COUNTER_TO_PWM_VALUE,			TIM_CHANNEL_2,			&htim3,			&(TIM3->CCR2)},
-		{SERVO3, 		SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,		SERVO_INIT_VALUE,			SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,			LIGHT_PWM_SCALE,		SERVO_COUNTER_TO_PWM_VALUE,			TIM_CHANNEL_3,			&htim3,			&(TIM3->CCR3)}
+		{SERVO1, 		SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,		SERVO_INIT_VALUE,			SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,			SERVO_PWM_SCALE,		SERVO_COUNTER_TO_PWM_VALUE,			TIM_CHANNEL_1,			&htim3,			&(TIM3->CCR1)},
+		{SERVO2, 		SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,		SERVO_INIT_VALUE,			SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,			SERVO_PWM_SCALE,		SERVO_COUNTER_TO_PWM_VALUE,			TIM_CHANNEL_2,			&htim3,			&(TIM3->CCR2)},
+		{SERVO3, 		SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,		SERVO_INIT_VALUE,			SERVO_SAFE_MIN_VALUE,		SERVO_SAFE_MAX_VALUE,			SERVO_PWM_SCALE,		SERVO_COUNTER_TO_PWM_VALUE,			TIM_CHANNEL_3,			&htim3,			&(TIM3->CCR3)}
 };
 
 PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm)
@@ -51,6 +54,7 @@ PUBLIC result_t SetThrusterPWM(ThrusterID_t thrusterID, pwm_t pwm)
 
 PUBLIC result_t SetServoPWM(PWMServoID_t SID, pwm_t pwm)
 {
+	SerialDebug(TAG, "ID: %d PWM: %d", SID, pwm);
 	*(pwmServoLookup[SID].timerReg) = pwm * pwmServoLookup[SID].counterValuePerPWM;
 		if(HAL_TIM_PWM_Start(pwmServoLookup[SID].timerHandler, pwmServoLookup[SID].timerChannel) == HAL_OK){
 			return RESULT_OK;
@@ -60,6 +64,7 @@ PUBLIC result_t SetServoPWM(PWMServoID_t SID, pwm_t pwm)
 
 PUBLIC result_t SetLightModulePWM(pwm_t pwm)
 {
+	SerialDebug(TAG, "Light PWM: %d", pwm);
 	TIM3->CCR4 = pwm * LIGHT_COUNTER_TO_PWM_VALUE;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
 	return RESULT_ERR;

@@ -43,8 +43,8 @@ PRIVATE void NavigationTask(void *argument)
 {
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "Navigation Task Starting...");
-	result_t initIMURes = NavigationIMUInit();
-	result_t initPressureRes = NAMod_SensorsInit();
+	result_t initIMURes = NAMod_IMUInit();
+	result_t initPressureRes = NAMod_PressureInit();
 
 
 
@@ -60,7 +60,7 @@ PRIVATE void NavigationTask(void *argument)
 		if(initIMURes == RESULT_ERR)
 		{
 			SerialDebug(TAG, "Reattempting IMU init");
-			initIMURes = NavigationIMUInit();
+			initIMURes = NAMod_IMUInit();
 		}
 		else
 		{
@@ -89,11 +89,11 @@ PRIVATE void NavigationTask(void *argument)
 
 		if(initPressureRes != RESULT_OK)
 		{
-			initPressureRes = NAMod_SensorsInit();
+			initPressureRes = NAMod_PressureInit();
 		}
 		else
 		{
-			if (NAMod_SensorRoutine() != RESULT_OK)
+			if (NAMod_PressureRoutine() != RESULT_OK)
 			{
 				SerialDebug(TAG, "Error getting PRESSURE SENSOR values");
 			}

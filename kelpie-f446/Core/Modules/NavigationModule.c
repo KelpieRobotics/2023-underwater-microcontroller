@@ -14,7 +14,7 @@
 #define TAG "NAM"
 
 
-PRIVATE result_t NavigationIMUInit()
+PRIVATE result_t NAMod_IMUInit()
 {
 	SerialDebug(TAG, "IMU Init Sequence Starting");
 	if(IMU_BeginI2C(0x4A,0)!= RESULT_OK)
@@ -40,7 +40,7 @@ PRIVATE result_t NavigationIMUInit()
 	return RESULT_OK;
 }
 
-PUBLIC result_t NAMod_SensorsInit()
+PUBLIC result_t NAMod_PressureInit()
 {
 	// Initialize Pressure Sensor
 	if (MS5837_init() != RESULT_OK)
@@ -54,7 +54,7 @@ PUBLIC result_t NAMod_SensorsInit()
 	return RESULT_OK;
 }
 
-PUBLIC result_t NAMod_SensorRoutine()
+PUBLIC result_t NAMod_PressureRoutine()
 {
 	// Initialize pointers to variables
 	depth_t depth;

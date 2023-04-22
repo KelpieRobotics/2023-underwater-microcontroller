@@ -16,7 +16,7 @@
  * converts the input to thruster , then calls DA_SetThrusterValue
  */
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
-	SerialDebug(TAG, "#DEBUG: AAMod_SetAppendageValue state: %d", state);
+	SerialDebug(TAG, "AAMod_SetAppendageValue state: %d", state);
 	switch(state){
 	case CLAW_OPEN:
 		DA_SetAppendageState(CLAW_L, GPIO_PIN_RESET);
@@ -56,11 +56,12 @@ PUBLIC void AAMod_ServoCallback(uint8_t *data){
  * converts the input to light pwm value, then calls DA_SetLightValue
  */
 PUBLIC void AAMod_SetLightValue(uint8_t input){
-	SerialDebug(TAG, " Setting light to input ",input);
+	SerialDebug(TAG, " ----------Setting light to input %d",input);
 	DA_SetLightValue(MapInputToPWM(input, LIGHT_PWM_SCALE, LIGHT_MIN_VALUE));
 }
 //takes uint8_t* and calls MCMod_SetLightValue with uint8_t input
 PUBLIC void AAMod_LightCallback(uint8_t *data){
 	AAMod_SetLightValue(data[0]);
+	SerialDebug(TAG, "-----------light data: %d", data[0]);
 	PiComms_Send("#ACK:",TAG,"!");
 }
