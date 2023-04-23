@@ -49,6 +49,9 @@ PUBLIC void AAMod_SetServoValue(ServoID_t id, uint8_t input){
 PUBLIC void AAMod_ServoCallback(uint8_t *data){
 	AAMod_SetServoValue(data[0], data[1]);
 	PiComms_Send("#ACK: %s !", TAG);
+
+	DA_ClearIdleEventBit();
+
 }
 
 
@@ -64,4 +67,5 @@ PUBLIC void AAMod_LightCallback(uint8_t *data){
 	AAMod_SetLightValue(data[0]);
 	SerialDebug(TAG, "-----------light data: %d", data[0]);
 	PiComms_Send("#ACK:",TAG,"!");
+	DA_SetIdleEventBit();
 }

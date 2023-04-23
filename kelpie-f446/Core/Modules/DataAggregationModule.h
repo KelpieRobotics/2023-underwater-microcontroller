@@ -49,6 +49,10 @@ typedef struct SystemData_t{
 	pressure_t pressure;
 } SystemData_t;
 
+PUBLIC void DA_SetIdleEventBit();
+PUBLIC void DA_ClearIdleEventBit();
+PUBLIC uint8_t DA_GetIdleEventBit();
+
 PUBLIC void DA_SetIMUQuaterion(float i, float j, float k, float real);
 PUBLIC IMUData_t DA_GetIMUQuaterion();
 

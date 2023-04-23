@@ -10,8 +10,6 @@
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
 
-//TEMP
-#include "AppendageActuationModule.h"
 
 #define TAG "MCT"
 
@@ -56,6 +54,19 @@ PRIVATE void MovementControlTask(void *argument)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
+
+		if(DA_GetIdleEventBit() == 1)
+		{
+			// IDLE STATE !!!!!!!!!
+			thrusterID = 0;
+			while(thrusterID < NUM_THRUSTERS){
+				//SerialDebug(TAG, "PWM set thruster %d: %d", thrusterID, DA_GetThrusterValue(thrusterID));
+				SetThrusterPWM(thrusterID, GetThrusterZeroValue(thrusterID));
+				thrusterID++;
+			}
+			continue;
+		}
+
 		//SerialDebug(TAG, "Movement Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly

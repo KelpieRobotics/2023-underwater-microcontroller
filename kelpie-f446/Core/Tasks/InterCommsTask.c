@@ -49,6 +49,10 @@ PRIVATE void ICommsTransmitRoutine()
 	temperature_t temperature = DA_GetTemperature();
 	//PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
 
+	pressure_t pressure = DA_GetPressure();
+	depth_t depth = DA_GetDepth();
+	//PiComms_Send("#PRS:%.6f#DEP:%.6f\n\r", pressure, depth);
+
 
 
 }
