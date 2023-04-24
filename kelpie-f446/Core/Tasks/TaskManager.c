@@ -21,5 +21,5 @@ void RunTaskManager()
 	InitInternalCommsTask();
 	InitMovementControlTask();
 	InitNavigationTask();
-	InitSafetyTask();
+	//InitSafetyTask();
 }

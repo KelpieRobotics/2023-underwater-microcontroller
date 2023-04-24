@@ -104,22 +104,25 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 PRIVATE PiCommsMessage_t PiComms_rxBufferToMessage()
 {
 	char * p = (char *)piComms_rxBuffer;		//Make idStr to hold id characters
-	char idBuilder[MESSAGE_ID_SIZE];
+	char idBuilder[MESSAGE_ID_SIZE+1];			// set last to null for string conversion
 	for(int i = 0; i<MESSAGE_ID_SIZE; i++){
 		idBuilder[i] = p[i];
 	}
+	idBuilder[MESSAGE_ID_SIZE] = NULL;			// set last to null for string conversion
 	const char * idStr = idBuilder;
 	p+=MESSAGE_ID_SIZE*sizeof(char);
 	char * endIDPtr = p;
 
-	char lenBuilder[MESSAGE_LENGTH_SIZE];		//Make lenStr to hold length characters
+	char lenBuilder[MESSAGE_LENGTH_SIZE+1];		//Make lenStr to hold length characters
 	for(int i = 0; i<MESSAGE_LENGTH_SIZE; i++){
 		lenBuilder[i] = p[i];
 	}
+	lenBuilder[MESSAGE_LENGTH_SIZE] = NULL;
 	const char * lenStr = lenBuilder;
 	p+=MESSAGE_LENGTH_SIZE*sizeof(char);
 	char * endLengthPtr = p;
 	const char * messageStr = p;				//Make messageStr to hold message data
+
 
 	PiCommsMessage_t msg = {									//make PiComms Message
 	.messageId = strtol(idStr, &endIDPtr, MESSAGE_ID_BASE),
@@ -129,6 +132,7 @@ PRIVATE PiCommsMessage_t PiComms_rxBufferToMessage()
 	msg.data = malloc(msg.dataLen*sizeof(char));				//allocate memory for msg.data
 
 	memcpy(msg.data, messageStr, msg.dataLen*sizeof(char));		//copy messageStr to msg.data
+
 
 	return msg;
 }
