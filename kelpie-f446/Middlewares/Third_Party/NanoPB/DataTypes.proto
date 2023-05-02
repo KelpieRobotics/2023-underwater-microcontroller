@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package KelpieRobotics_2023;
+
+enum KelpieResult 
+{
+    OK = 0;
+    ERROR_I2C = 1;
+    ERROR_UART = 2;
+    ERROR_NETWORK = 3;
+    ERROR_PIN_ERROR = 4;
+    ERROR_VALUE_ERROR = 5;
+}
+
+message ThrusterCommand 
+{
+    uint32 thruster_0_PWM = 1;
+    uint32 thruster_1_PWM = 2;
+    uint32 thruster_2_PWM = 3;
+    uint32 thruster_3_PWM = 4;
+    uint32 thruster_4_PWM = 5;
+    uint32 thruster_5_PWM = 6;
+    uint32 thruster_6_PWM = 7;
+    uint32 thruster_7_PWM = 8;
+    
+    KelpieResult result = 14;
+}
+
+message AttachmentCommand 
+{
+    uint32 servo_0_PWM = 1;
+    uint32 servo_1_PWM = 2;
+    uint32 servo_2_PWM = 3;
+    
+    uint32 light_PWM = 4;
+    
+    sint32 claw_state = 5;
+    
+    KelpieResult result = 14;
+}
+
+message SensorsData 
+{
+    double temperature = 1;
+    double humidity = 2;
+    
+    double pressure = 3;
+    double depth = 4;
+    
+    double accelerometer_x = 5;
+    double accelerometer_y = 6;
+    double accelerometer_z = 7;
+    
+    double quaternion_real = 8;
+    double quaternion_i = 9;
+    double quaternion_j = 10;
+    double quaternion_k = 11;
+    
+    KelpieResult result = 14;
+}
+
+message SafetyData 
+{
+    double power_0 = 1;
+    double power_1 = 2;
+    double power_2 = 3;
+    double power_3 = 4;
+    
+    double current_0 = 5;
+    double current_1 = 6;
+    double current_2 = 7;
+    double current_3 = 8;
+    
+    double voltage_0 = 9;
+    double voltage_1 = 10;
+    double voltage_2 = 11;
+    double voltage_3 = 12;
+    
+    bool leak = 13;
+    
+    KelpieResult result = 14;
+}
+
+message PollMessage 
+{
+    uint32 thruster_0_PWM = 1;
+    uint32 thruster_1_PWM = 2;
+    uint32 thruster_2_PWM = 3;
+    uint32 thruster_3_PWM = 4;
+    uint32 thruster_4_PWM = 5;
+    uint32 thruster_5_PWM = 6;
+    uint32 thruster_6_PWM = 7;
+    uint32 thruster_7_PWM = 8;
+    
+    uint32 servo_0_PWM = 9;
+    uint32 servo_1_PWM = 10;
+    uint32 servo_2_PWM = 11;
+    
+    uint32 light_PWM = 12;
+    
+    uint32 claw_state = 13;
+
+    KelpieResult result = 14;
+}
+
+message OutgoingMessage 
+{
+    oneof data
+    {
+        ThrusterCommand thrusterCommand = 1;
+        AttachmentCommand attachmentCommand = 2;
+    }
+    uint32 id = 3;
+}
+
+message IncomingMessage 
+{
+    oneof data
+    {
+        SensorsData sensorsData = 3;
+        SafetyData safetyData = 4;
+        PollMessage pollMessage = 5;
+    }
+    uint32 id = 6;
+}

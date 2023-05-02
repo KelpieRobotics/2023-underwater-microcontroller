@@ -75,7 +75,6 @@ PRIVATE void InternalCommsTask(void *argument)
 			{
 				SerialDebug(TAG,"ERR: InternalCommsTask message callback failed");
 			}
-			free(msg.data);						//free msg.data that is allocated in driver
 		}
 		ICommsTransmitRoutine();
 	}
