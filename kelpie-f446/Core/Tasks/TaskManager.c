@@ -14,9 +14,9 @@
 
 void RunTaskManager()
 {
-	InitAppendageActuationTask();
+	//InitAppendageActuationTask();
 	InitInternalCommsTask();
-	InitMovementControlTask();
-	InitNavigationTask();
-	InitSafetyTask();
+	//InitMovementControlTask();
+	//InitNavigationTask();
+	//InitSafetyTask();
 }

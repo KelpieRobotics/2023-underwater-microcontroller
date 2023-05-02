@@ -13,6 +13,8 @@
 
 #include "stdlib.h"
 
+#define TAG "PCM"
+
 extern UART_HandleTypeDef huart4;
 static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
@@ -50,6 +52,7 @@ PUBLIC void PiComms_Init(){
 	PiCommsQueue_init(&piCommsQueue);
 
 	TEST_PB_MESSAGE.id = 10;
+	SerialDebug(TAG, "PiCommsModile Starting...");
 }
 
 PUBLIC void PiComms_Send(const char * message, ...)
@@ -69,6 +72,7 @@ PUBLIC void PiComms_Send(const char * message, ...)
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+	SerialDebug(TAG, "HAL_UART_RxCpltCallback %d", piComms_rxBuffer_index[0]);
 	uint8_t recievedByte = piComms_rxBuffer_index[0];
 	if(lastWasReturn && (recievedByte == '\n')){
 			SerialPrintln("#DEBUG: lastMessage: %d",TEST_PB_MESSAGE.id);		//Extremely useful for debugging rx_Buffer
