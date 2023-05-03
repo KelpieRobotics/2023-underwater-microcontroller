@@ -55,7 +55,7 @@ PRIVATE void ICommsTransmitRoutine()
 
 //Utility function that sends a command to mcu if PI_TX is shorted to PI_RX
 PRIVATE void DebugMessage(){
-	uint8_t message[] = {10, 14, 8, 128, 1, 24, 0, 32, 57, 40, 63, 64, 255, 1, 112, 6, 18, 8, 16, 45, 32, 78, 40, 2, 112, 0};
+	uint8_t message[] = {10, 18, 8, 128, 1, 16, 18, 32, 57, 40, 63, 48, 55, 56, 25, 64, 255, 1, 112, 6, 18, 12, 8, 45, 16, 5, 24, 43, 32, 78, 40, 2, 112, 3};
 	for(int i = 0; i < sizeof(message); i++){
 		PiComms_Send("%c", (char)message[i]);
 	}

@@ -49,18 +49,11 @@ PUBLIC void AAMod_SetServoValue(ServoID_t id, uint8_t input){
 }
 
 PUBLIC void AAMod_Callback(AttachmentCommand ac){
-	if(ac.has_claw_state) AAMod_SetAppendageValue((claw_state_t)ac.claw_state);
-	if(ac.has_light_PWM) AAMod_SetLightValue((uint8_t)ac.light_PWM);
-	if(ac.has_servo_0_PWM) AAMod_SetServoValue(0, ac.servo_0_PWM);
-	if(ac.has_servo_1_PWM) AAMod_SetServoValue(1, ac.servo_1_PWM);
-	if(ac.has_servo_2_PWM) AAMod_SetServoValue(2, ac.servo_2_PWM);
-
-	SerialDebug(TAG, "Set Attachments: %s%s%s%s%s",
-				(ac.has_claw_state ? "claw, " : ""),
-				(ac.has_light_PWM ? "light, " : ""),
-				(ac.has_servo_0_PWM ? "servo_0, " : ""),
-				(ac.has_servo_1_PWM ? "servo_1, " : ""),
-				(ac.has_servo_2_PWM ? "servo_2" : ""));
+	AAMod_SetAppendageValue((claw_state_t)ac.claw_state);
+	AAMod_SetLightValue((uint8_t)ac.light_PWM);
+	AAMod_SetServoValue(0, ac.servo_0_PWM);
+	AAMod_SetServoValue(1, ac.servo_1_PWM);
+	AAMod_SetServoValue(2, ac.servo_2_PWM);
 
 	PiComms_Send("#ACK:%s!", TAG);
 }

@@ -49,24 +49,24 @@ PRIVATE void PrintPiCommsMessage_t(PiCommsMessage_t msg){
 	SerialPrintln("PrintPiCommsMessage_t");
 	if(msg.has_attachmentCommand){
 		SerialPrintln("attachmentCommand");
-		SerialPrint("claw_state: %d\t", (msg.attachmentCommand.has_claw_state ? msg.attachmentCommand.claw_state : -1));
-		SerialPrint("light_PWM: %d\t", (msg.attachmentCommand.has_light_PWM ? msg.attachmentCommand.light_PWM : -1));
-		SerialPrint("servo_0_PWM: %d\t", (msg.attachmentCommand.has_servo_0_PWM ? msg.attachmentCommand.servo_0_PWM : -1));
-		SerialPrint("servo_1_PWM: %d\t", (msg.attachmentCommand.has_servo_1_PWM ? msg.attachmentCommand.servo_1_PWM : -1));
-		SerialPrint("servo_2_PWM: %d\t", (msg.attachmentCommand.has_servo_2_PWM ? msg.attachmentCommand.servo_2_PWM : -1));
+		SerialPrint("claw_state: %d\t", msg.attachmentCommand.claw_state);
+		SerialPrint("light_PWM: %d\t", msg.attachmentCommand.light_PWM);
+		SerialPrint("servo_0_PWM: %d\t", msg.attachmentCommand.servo_0_PWM);
+		SerialPrint("servo_1_PWM: %d\t", msg.attachmentCommand.servo_1_PWM);
+		SerialPrint("servo_2_PWM: %d\t", msg.attachmentCommand.servo_2_PWM);
 		SerialPrint("result: %d\t", msg.attachmentCommand.result);
 	}
 	SerialPrintln("");
 	if(msg.has_thrusterCommand){
 		SerialPrintln("thrusterCommand");
-		SerialPrint("thruster_0_PWM: %d\t", (msg.thrusterCommand.has_thruster_0_PWM ? msg.thrusterCommand.thruster_0_PWM : -1));
-		SerialPrint("thruster_1_PWM: %d\t", (msg.thrusterCommand.has_thruster_1_PWM ? msg.thrusterCommand.thruster_1_PWM : -1));
-		SerialPrint("thruster_2_PWM: %d\t", (msg.thrusterCommand.has_thruster_2_PWM ? msg.thrusterCommand.thruster_2_PWM : -1));
-		SerialPrintln("thruster_3_PWM: %d\t", (msg.thrusterCommand.has_thruster_3_PWM ? msg.thrusterCommand.thruster_3_PWM : -1));
-		SerialPrint("thruster_4_PWM: %d\t", (msg.thrusterCommand.has_thruster_4_PWM ? msg.thrusterCommand.thruster_4_PWM : -1));
-		SerialPrint("thruster_5_PWM: %d\t", (msg.thrusterCommand.has_thruster_5_PWM ? msg.thrusterCommand.thruster_5_PWM : -1));
-		SerialPrint("thruster_6_PWM: %d\t", (msg.thrusterCommand.has_thruster_6_PWM ? msg.thrusterCommand.thruster_6_PWM : -1));
-		SerialPrintln("thruster_7_PWM: %d\t", (msg.thrusterCommand.has_thruster_7_PWM ? msg.thrusterCommand.thruster_7_PWM : -1));
+		SerialPrint("thruster_0_PWM: %d\t", msg.thrusterCommand.thruster_0_PWM);
+		SerialPrint("thruster_1_PWM: %d\t", msg.thrusterCommand.thruster_1_PWM);
+		SerialPrint("thruster_2_PWM: %d\t", msg.thrusterCommand.thruster_2_PWM);
+		SerialPrintln("thruster_3_PWM: %d\t", msg.thrusterCommand.thruster_3_PWM);
+		SerialPrint("thruster_4_PWM: %d\t", msg.thrusterCommand.thruster_4_PWM);
+		SerialPrint("thruster_5_PWM: %d\t", msg.thrusterCommand.thruster_5_PWM);
+		SerialPrint("thruster_6_PWM: %d\t", msg.thrusterCommand.thruster_6_PWM);
+		SerialPrintln("thruster_7_PWM: %d\t", msg.thrusterCommand.thruster_7_PWM);
 		SerialPrint("result: %d\t", msg.thrusterCommand.result);
 	}
 	SerialPrintln("");

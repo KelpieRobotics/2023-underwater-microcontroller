@@ -1,4 +1,4 @@
-#include "picomsDataTypes_KR23.pb.h"
+#include "picomsDataTypes_KR23_proto3.pb.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
 #include <stdio.h>
@@ -20,25 +20,23 @@ int main() {
 		pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 		KR23_ThrusterCommand tc = KR23_ThrusterCommand_init_zero;
 		tc.thruster_0_PWM = 128;
-		tc.has_thruster_0_PWM = true;
+		tc.thruster_1_PWM = 18;
 		tc.thruster_2_PWM = 0;
-		tc.has_thruster_2_PWM = true;
 		tc.thruster_3_PWM = 57;
-		tc.has_thruster_3_PWM = true;
 		tc.thruster_4_PWM = 63;
-		tc.has_thruster_4_PWM = true;
+		tc.thruster_5_PWM = 55;
+		tc.thruster_6_PWM = 25;
 		tc.thruster_7_PWM = 255;
-		tc.has_thruster_7_PWM = true;
 		tc.result = KR23_KelpieResult_WARNING;
+		msgOut.thrusterCommand = tc;
+		//msgOut.has_thrusterCommand = true;
 		KR23_AttachmentCommand ac = KR23_AttachmentCommand_init_zero;
 		ac.claw_state = KR23_KelpieClawState_OPEN;
-		ac.has_claw_state = true;
-		ac.servo_1_PWM = 45;
-		ac.has_servo_1_PWM = true;
+		ac.servo_0_PWM = 45;
+		ac.servo_1_PWM = 5;
+		ac.servo_2_PWM = 43;
 		ac.light_PWM = 78;
-		ac.has_light_PWM = true;
-		msgOut.thrusterCommand = tc;
-		msgOut.has_thrusterCommand = true;
+		ac.result = KR23_KelpieResult_ERROR_NETWORK;
 		msgOut.attachmentCommand = ac;
 		msgOut.has_attachmentCommand = true;
 

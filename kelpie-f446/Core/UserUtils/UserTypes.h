@@ -9,7 +9,7 @@
 #define USERUTILS_USERTYPES_H_
 
 #include <stdint.h>
-#include "..\..\..\Middlewares\Third_Party\NanoPB\picomsDataTypes_KR23.pb.h"
+#include "..\..\..\Middlewares\Third_Party\NanoPB\picomsDataTypes_KR23_proto3.pb.h"
 
 #define PUBLIC
 #define PRIVATE
