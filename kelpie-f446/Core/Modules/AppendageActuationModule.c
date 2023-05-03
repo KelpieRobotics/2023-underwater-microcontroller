@@ -30,7 +30,7 @@ PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
 	}
 }
 
-PUBLIC void AAMod_AppendageCallback(uint8_t * data){
+PUBLIC void AAMod_AppendageCallback(AttachmentCommand ac){
 	/*
 	char * state = (char *)data;
 	if(state[0] == 'F') AAMod_SetAppendageValue(-1);
@@ -43,4 +43,7 @@ PUBLIC void AAMod_AppendageCallback(uint8_t * data){
 	 * if (state != -1 && state != 0 && state != 1) SerialDebug(TAG, "Incorrect appendage state: %d", state);
 	 * AAMod_SetAppendageValue(state);
 	 */
+	if(ac.has_claw_state) AAMod_SetAppendageValue(ac.claw_state);
+
+	PiComms_Send("#ACK:%s!", TAG);
 }

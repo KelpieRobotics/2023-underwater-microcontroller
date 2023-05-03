@@ -13,12 +13,12 @@
 #include "stm32f4xx_hal.h"
 
 typedef enum {
-	CLAW_OPEN = -1,
 	CLAW_IDLE,
-	CLAW_CLOSE
+	CLAW_CLOSE,
+	CLAW_OPEN
 } claw_state_t;
 
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state);
-PUBLIC void AAMod_AppendageCallback(uint8_t * data);
+PUBLIC void AAMod_AppendageCallback(AttachmentCommand attachmentCommand);
 
 #endif /* MODULES_APPENDAGEACTUATIONMODULE_H_ */

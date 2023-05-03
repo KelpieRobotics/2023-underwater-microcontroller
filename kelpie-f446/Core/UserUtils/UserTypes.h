@@ -9,6 +9,7 @@
 #define USERUTILS_USERTYPES_H_
 
 #include <stdint.h>
+#include "..\..\..\Middlewares\Third_Party\NanoPB\picomsDataTypes_KR23.pb.h"
 
 #define PUBLIC
 #define PRIVATE
@@ -22,12 +23,9 @@ typedef uint16_t angular_degrees_t;
 typedef uint16_t pwm_t;
 typedef uint16_t appendage_t;
 
-typedef struct PiCommsMessage_t
-{
-	uint16_t messageId;
-	uint16_t dataLen;
-	uint8_t *data;
-}PiCommsMessage_t;
+typedef KR23_OutgoingMessage PiCommsMessage_t;
+typedef KR23_ThrusterCommand ThrusterCommand;
+typedef KR23_AttachmentCommand AttachmentCommand;
 
 typedef enum {
     RESULT_OK = 0,
