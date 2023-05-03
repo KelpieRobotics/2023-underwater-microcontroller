@@ -8,7 +8,7 @@
 #include "PiCommsDriver.h"
 #include "SerialDebugDriver.h"
 #include "UserTypes.h"
-#include "..\..\..\Middlewares\Third_Party\NanoPB\DataTypes.pb.h"
+#include "..\..\..\Middlewares\Third_Party\NanoPB\picomsDataTypes_KR23.pb.h"
 #include "..\..\..\Middlewares\Third_Party\NanoPB\pb_decode.h"
 
 #include "stdlib.h"
@@ -16,15 +16,17 @@
 #define TAG "PCM"
 
 extern UART_HandleTypeDef huart4;
+UART_HandleTypeDef* uart4Handle = &huart4;
 static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
 #define RX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
-bool lastWasReturn = false;
-bool decodeSuccessful = false;
+static char term1 = 'K';	//somewhat arbitrary termination characters of message are chosen so that they are unlikely to occur sequentially in any messages
+static char term2 = '.';	// this will be replaced with cobs bit stuffing so 0 is termination
+bool lastWasTerm1 = false;
 
-KelpieRobotics_2023_OutgoingMessage TEST_PB_MESSAGE = KelpieRobotics_2023_OutgoingMessage_init_default;
+KR23_OutgoingMessage TEST_PB_MESSAGE = KR23_OutgoingMessage_init_default;
 
 
 // Circular Queue
@@ -40,7 +42,7 @@ typedef struct PiCommsQueue_t
 PiCommsQueue_t piCommsQueue;	//queue of all received messages as PiCommsMessage_t
 
 
-PRIVATE KelpieRobotics_2023_OutgoingMessage PiComms_rxBufferToMessage(uint16_t protobufLen);
+PRIVATE void PiComms_handleMessage(uint16_t protobufLen);
 PRIVATE void PiCommsQueue_init(PiCommsQueue_t * q);
 PRIVATE PiCommsMessage_t PiCommsQueue_dequeue(PiCommsQueue_t * q);
 PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, PiCommsMessage_t value);
@@ -48,10 +50,9 @@ PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, PiCommsMessage_t value);
 PUBLIC void PiComms_Init(){
 	piComms_rxBuffer_index = piComms_rxBuffer;
 
-	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
+	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);
 	PiCommsQueue_init(&piCommsQueue);
 
-	TEST_PB_MESSAGE.id = 10;
 	SerialDebug(TAG, "PiCommsModile Starting...");
 }
 
@@ -60,47 +61,52 @@ PUBLIC void PiComms_Send(const char * message, ...)
 	va_list args;
 	va_start(args, message);
 	length_t len = vsprintf(messageBuf, message, args);
-	HAL_UART_Transmit(&huart4, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
+	HAL_UART_Transmit(uart4Handle, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
 	va_end(args);
 
 }
 
 /*
- * message format is "<protobuf message>\r\n"
- * We check for "\r\n" and consider anything that came before it to be a <protobuf message>
- * if by coincidence or error we receive "\r\n" and what comes before is not <protobuf message>, we discard the message, report the occurrence to topside to be logged there
+ * message format is "<protobuf message>'term1''term2'"
+ * We check for 'term1''term2' and consider anything that came before it to be a <protobuf message>
+ * if by coincidence or error we receive 'term1''term2' and what comes before is not <protobuf message>, we discard the message, report the occurrence to topside to be logged there
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	SerialDebug(TAG, "HAL_UART_RxCpltCallback %d", piComms_rxBuffer_index[0]);
+	SerialPrint("New char: %c\n", piComms_rxBuffer_index[0]);
 	uint8_t recievedByte = piComms_rxBuffer_index[0];
-	if(lastWasReturn && (recievedByte == '\n')){
-			SerialPrintln("#DEBUG: lastMessage: %d",TEST_PB_MESSAGE.id);		//Extremely useful for debugging rx_Buffer
+	if(lastWasTerm1 && (recievedByte == term2)){
 		uint16_t protobufLen = piComms_rxBuffer_index - piComms_rxBuffer - 1;		//protobufLen = length the data received + 1 - 2. The 1 comes from an inclusive difference between the base and incremented pointer. The -2 comes from removing the last 2 characters "\r\n"
-			SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
-			SerialPrintln("#DEBUG: protobufLen: %d",protobufLen);		//Extremely useful for debugging rx_Buffer
+		SerialPrint("full message: %s\n",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
+		SerialPrint("protobufLen: %d\n",protobufLen);		//Extremely useful for debugging rx_Buffer
 		piComms_rxBuffer_index = piComms_rxBuffer;					//reset piComms_rxBuffer_index if it is not the last byte in a message
-		PiComms_rxBufferToMessage(protobufLen);						//make message
+		PiComms_handleMessage(protobufLen);						//make message
 		memset(piComms_rxBuffer, '\0', (protobufLen+2) * sizeof(uint8_t));		//reset buffer
 	} else {
 		piComms_rxBuffer_index++;		//increment piComms_rxBuffer_index if it is not the last byte in a message
 	}
 
-	lastWasReturn = (recievedByte == '\r');		//set lastWasReturn
+	lastWasTerm1 = (recievedByte == term1);		//set lastWasTerm1
 
-	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);	//ready to receive next byte
-	//SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
+	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);	//ready to receive next byte
+	SerialPrint("HAL_UART_RxCpltCallback message: %s\n",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
 }
 
 /*Allocates and assigns  */
-PRIVATE KelpieRobotics_2023_OutgoingMessage PiComms_rxBufferToMessage(uint16_t protobufLen)
+PRIVATE void PiComms_handleMessage(uint16_t protobufLen)
 {
 	const pb_byte_t * pbBuffer = (pb_byte_t *)piComms_rxBuffer;
-	KelpieRobotics_2023_OutgoingMessage recievedMessage;
+	KR23_OutgoingMessage recievedMessage;
 
-	pb_istream_t istream = pb_istream_from_buffer(pbBuffer, protobufLen);
-	decodeSuccessful = pb_decode(&istream, KelpieRobotics_2023_OutgoingMessage_fields, &recievedMessage);
-	return recievedMessage;
+	pb_istream_t istream = pb_istream_from_buffer(pbBuffer, protobufLen * sizeof(uint8_t));
+	SerialPrint("%s: istream is: %s", TAG, (char *)(&istream));
+	bool decodeSuccessful = pb_decode(&istream, KR23_OutgoingMessage_fields, &recievedMessage);
+	if(decodeSuccessful){
+		SerialPrint("%s: Enque Message", TAG);
+		//PiCommsQueue_enqueue(&piCommsQueue, recievedMessage);
+	}else{
+		SerialPrint("%s: Problem decoding Message", TAG);
+	}
 }
 
 

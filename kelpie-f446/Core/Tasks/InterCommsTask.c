@@ -76,6 +76,14 @@ PRIVATE void InternalCommsTask(void *argument)
 				SerialDebug(TAG,"ERR: InternalCommsTask message callback failed");
 			}
 		}
-		ICommsTransmitRoutine();
+		//ICommsTransmitRoutine();
+
+		uint8_t message[] = {10, 5, 8, 128, 1, 112, 6};
+		for(int i = 0; i < sizeof(message); i++){
+			PiComms_Send("%c", (char)message[i]);
+		}
+		osDelay(1000);
+		PiComms_Send("K.");
+		osDelay(1000);
 	}
 }
