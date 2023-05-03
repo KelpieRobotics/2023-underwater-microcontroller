@@ -43,15 +43,27 @@ PUBLIC void InitInternalCommsTask(void)
 PRIVATE void ICommsTransmitRoutine()
 {
 	IMUData_t imudata = DA_GetIMUQuaterion();
-	//PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
+	PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
 
 	humidity_t humidity = DA_GetHumidity();
 	temperature_t temperature = DA_GetTemperature();
-	//PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
+	PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
 
 
 
 }
+
+//Utility function that sends a command to mcu if PI_TX is shorted to PI_RX
+PRIVATE void DebugMessage(){
+	uint8_t message[] = {10, 14, 8, 128, 1, 24, 0, 32, 57, 40, 63, 64, 255, 1, 112, 6, 18, 8, 16, 45, 32, 78, 40, 2, 112, 0};
+	for(int i = 0; i < sizeof(message); i++){
+		PiComms_Send("%c", (char)message[i]);
+	}
+	osDelay(1000);
+	PiComms_Send("K.");
+	osDelay(1000);
+}
+
 PRIVATE void InternalCommsTask(void *argument)
 {
 	PiCommsMessage_t msg;
@@ -75,8 +87,8 @@ PRIVATE void InternalCommsTask(void *argument)
 			{
 				SerialDebug(TAG,"ERR: InternalCommsTask message callback failed");
 			}
-			free(msg.data);						//free msg.data that is allocated in driver
 		}
 		ICommsTransmitRoutine();
+		//DebugMessage();			//extremely useful for debugging top-to-bottom command pipeline
 	}
 }

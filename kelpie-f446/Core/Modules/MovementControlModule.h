@@ -12,7 +12,6 @@
 #include "PWMDriver.h"
 
 PUBLIC void MCMod_SetThrusterValue(ThrusterID_t id, uint8_t input);
-PUBLIC pwm_t MapInputToPWM(uint8_t input, const double scale, pwm_t minValue);
-PUBLIC void MCMod_ThrusterCallback(uint8_t *data);
+PUBLIC void MCMod_ThrusterCallback(ThrusterCommand thrusterCommand);
 
 #endif /* MODULES_MOVEMENTCONTROLMODULE_H_ */

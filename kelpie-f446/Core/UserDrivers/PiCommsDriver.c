@@ -8,19 +8,24 @@
 #include "PiCommsDriver.h"
 #include "SerialDebugDriver.h"
 #include "UserTypes.h"
+#include "..\..\..\Middlewares\Third_Party\NanoPB\pb_decode.h"
 
 #include "stdlib.h"
 
-extern UART_HandleTypeDef huart4;
-static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
+#define TAG "PCM"
 
-#define MESSAGE_ID_SIZE 4		//number of bytes of message ID
-#define MESSAGE_LENGTH_SIZE 4	//number of bytes of message length
-#define MESSAGE_ID_BASE 16		//base of message ID and length are hex
+extern UART_HandleTypeDef huart4;
+UART_HandleTypeDef* uart4Handle = &huart4;
+static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
 #define RX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
+static char term1 = 'K';	//somewhat arbitrary termination characters of message are chosen so that they are unlikely to occur sequentially in any messages
+static char term2 = '.';	// this will be replaced with cobs bit stuffing so 0 is termination
+bool lastWasTerm1 = false;
+
+KR23_OutgoingMessage TEST_PB_MESSAGE = KR23_OutgoingMessage_init_default;
 
 
 // Circular Queue
@@ -36,16 +41,19 @@ typedef struct PiCommsQueue_t
 PiCommsQueue_t piCommsQueue;	//queue of all received messages as PiCommsMessage_t
 
 
-PRIVATE PiCommsMessage_t PiComms_rxBufferToMessage();
+PRIVATE void PiComms_handleMessage(uint16_t protobufLen);
 PRIVATE void PiCommsQueue_init(PiCommsQueue_t * q);
-PRIVATE PiCommsMessage_t PiCommsQueue_dequeue(PiCommsQueue_t * q);
-PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, PiCommsMessage_t value);
+PRIVATE KR23_OutgoingMessage PiCommsQueue_dequeue(PiCommsQueue_t * q);
+PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, KR23_OutgoingMessage value);
+
 
 PUBLIC void PiComms_Init(){
 	piComms_rxBuffer_index = piComms_rxBuffer;
 
-	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
+	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);
 	PiCommsQueue_init(&piCommsQueue);
+
+	SerialDebug(TAG, "PiCommsModile Starting...");
 }
 
 PUBLIC void PiComms_Send(const char * message, ...)
@@ -53,88 +61,51 @@ PUBLIC void PiComms_Send(const char * message, ...)
 	va_list args;
 	va_start(args, message);
 	length_t len = vsprintf(messageBuf, message, args);
-	HAL_UART_Transmit(&huart4, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
+	HAL_UART_Transmit(uart4Handle, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
 	va_end(args);
 
 }
 
 /*
- * if # clear buffer
- * if ! enqueue to queue
- * else add to buffer
+ * message format is "<protobuf message>'term1''term2'"
+ * We check for 'term1''term2' and consider anything that came before it to be a <protobuf message>
+ * if by coincidence or error we receive 'term1''term2' and what comes before is not <protobuf message>, we discard the message, report the occurrence to topside to be logged there
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(piComms_rxBuffer_index - piComms_rxBuffer > RX_BUFFER_SIZE){
-		//SerialPrintln("#ERR: HAL_UART_RxCpltCallback BUFFER FULL");
-		if(piComms_rxBuffer_index[0] != '!'){
-			HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
-			return;
-		}
+	uint8_t recievedByte = piComms_rxBuffer_index[0];
+	if(lastWasTerm1 && (recievedByte == term2)){
+		uint16_t protobufLen = piComms_rxBuffer_index - piComms_rxBuffer - 1;		//protobufLen = length the data received + 1 - 2. The 1 comes from an inclusive difference between the base and incremented pointer. The -2 comes from removing the last 2 characters "\r\n"
+		piComms_rxBuffer_index = piComms_rxBuffer;					//reset piComms_rxBuffer_index if it is not the last byte in a message
+		PiComms_handleMessage(protobufLen);						//make message
+		memset(piComms_rxBuffer, '\0', (protobufLen+2) * sizeof(uint8_t));		//reset buffer
+	} else if(piComms_rxBuffer_index - piComms_rxBuffer < RX_BUFFER_SIZE - 1) {
+		piComms_rxBuffer_index++;						//increment piComms_rxBuffer_index if it is not the last byte in a message
+	} else {
+		SerialDebug(TAG,"PI_RX Buffer capacity exceeded");
+		piComms_rxBuffer_index = piComms_rxBuffer;								//reset piComms_rxBuffer_index if it is not the last byte in a message
+		memset(piComms_rxBuffer, '\0', RX_BUFFER_SIZE * sizeof(uint8_t));		//reset buffer
 	}
 
-	switch (piComms_rxBuffer_index[0]){
-		case '#':
-			piComms_rxBuffer_index[0] = '\0';	//revert last char so it isn't sent forward
-			break;
-		case '!':
-			piComms_rxBuffer_index[0] = '\0';	//revert last char so it isn't sent forward
+	lastWasTerm1 = (recievedByte == term1);		//set lastWasTerm1
 
-			uint8_t rxLen = piComms_rxBuffer_index - piComms_rxBuffer;
-			if(rxLen < MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE){		//handle incomplete transmissions
-				//SerialPrintln("#ERR: HAL_UART_RxCpltCallback rx buffer message missing information, message: %s, len: %d",piComms_rxBuffer, rxLen);
-			} else{
-				PiCommsQueue_enqueue(&piCommsQueue, PiComms_rxBufferToMessage());	//convert rx buffer to message and enqueue in message queue
-			}
-			piComms_rxBuffer_index = piComms_rxBuffer;							//reset piComms_rxBuffer
-			memset(piComms_rxBuffer, '\0', rxLen * sizeof(uint8_t));	//clear rx buffer
-			break;
-		case '\r':		//THIS IS NEEDED FOR DEBUGGING IF \r CHARACTER IS SENT AS PART OF MESSAGE
-			break;
-		default:
-			piComms_rxBuffer_index++;
-			break;
-	}
-
-	HAL_UART_Receive_IT(&huart4, piComms_rxBuffer_index, 1);
-	//SerialPrintln("#DEBUG: HAL_UART_RxCpltCallback message: %s",piComms_rxBuffer);		//Extremely useful for debugging rx_Buffer
+	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);	//ready to receive next byte
+	//SerialPrintln("HAL_UART_RxCpltCallback %p - %p = %d", piComms_rxBuffer_index, piComms_rxBuffer, (piComms_rxBuffer_index - piComms_rxBuffer));		//Extremely useful for debugging rx_Buffer
 }
 
 /*Allocates and assigns  */
-PRIVATE PiCommsMessage_t PiComms_rxBufferToMessage()
+PRIVATE void PiComms_handleMessage(uint16_t protobufLen)
 {
-	char * p = (char *)piComms_rxBuffer;		//Make idStr to hold id characters
-	char idBuilder[MESSAGE_ID_SIZE+1];			// set last to null for string conversion
-	for(int i = 0; i<MESSAGE_ID_SIZE; i++){
-		idBuilder[i] = p[i];
+	const pb_byte_t * pbBuffer = (pb_byte_t *)piComms_rxBuffer;
+	KR23_OutgoingMessage recievedMessage;
+
+	pb_istream_t istream = pb_istream_from_buffer(pbBuffer, protobufLen * sizeof(uint8_t));
+	bool decodeSuccessful = pb_decode(&istream, KR23_OutgoingMessage_fields, &recievedMessage);
+	if(decodeSuccessful){
+		PiCommsQueue_enqueue(&piCommsQueue, recievedMessage);
+	}else{
+		SerialDebug(TAG, "Problem decoding Message");
 	}
-	idBuilder[MESSAGE_ID_SIZE] = NULL;			// set last to null for string conversion
-	const char * idStr = idBuilder;
-	p+=MESSAGE_ID_SIZE*sizeof(char);
-	char * endIDPtr = p;
-
-	char lenBuilder[MESSAGE_LENGTH_SIZE+1];		//Make lenStr to hold length characters
-	for(int i = 0; i<MESSAGE_LENGTH_SIZE; i++){
-		lenBuilder[i] = p[i];
-	}
-	lenBuilder[MESSAGE_LENGTH_SIZE] = NULL;
-	const char * lenStr = lenBuilder;
-	p+=MESSAGE_LENGTH_SIZE*sizeof(char);
-	char * endLengthPtr = p;
-	const char * messageStr = p;				//Make messageStr to hold message data
-
-
-	PiCommsMessage_t msg = {									//make PiComms Message
-	.messageId = strtol(idStr, &endIDPtr, MESSAGE_ID_BASE),
-	.dataLen = strtol(lenStr, &endLengthPtr, MESSAGE_ID_BASE),
-	.data = NULL};
-
-	msg.data = malloc(msg.dataLen*sizeof(char));				//allocate memory for msg.data
-
-	memcpy(msg.data, messageStr, msg.dataLen*sizeof(char));		//copy messageStr to msg.data
-
-
-	return msg;
 }
 
 
@@ -145,7 +116,7 @@ uint8_t PiComms_IsEmpty()
 	return 1;
 }
 
-PiCommsMessage_t PiComms_GetNext()
+KR23_OutgoingMessage PiComms_GetNext()
 {
 	return PiCommsQueue_dequeue(&piCommsQueue);
 }
@@ -173,7 +144,7 @@ PRIVATE void PiCommsQueue_init( PiCommsQueue_t * q )
 	q->tail = 0;
 }
 
-PRIVATE void PiCommsQueue_enqueue( PiCommsQueue_t * q, PiCommsMessage_t msg )
+PRIVATE void PiCommsQueue_enqueue( PiCommsQueue_t * q, KR23_OutgoingMessage msg )
 {
 	if(q->count < QUEUE_MAX)
 	{
@@ -186,17 +157,17 @@ PRIVATE void PiCommsQueue_enqueue( PiCommsQueue_t * q, PiCommsMessage_t msg )
 	}
 }
 
-PRIVATE PiCommsMessage_t PiCommsQueue_dequeue( PiCommsQueue_t * q)
+PRIVATE KR23_OutgoingMessage PiCommsQueue_dequeue( PiCommsQueue_t * q)
 {
 	if(q->count > 0)
 	{
-		PiCommsMessage_t returnValue = q->data[q->head];
+		KR23_OutgoingMessage returnValue = q->data[q->head];
 		q->count --;
 		q->head = (q->head + 1) % QUEUE_MAX;
 		return returnValue;
 	}
-	PiCommsMessage_t failedMessage;
-	failedMessage.messageId = -1;
-	failedMessage.dataLen = -1;
+	KR23_OutgoingMessage failedMessage;
+	failedMessage.has_attachmentCommand = false;
+	failedMessage.has_thrusterCommand = false;
 	return failedMessage;// garbage value, should never be returned
 }
