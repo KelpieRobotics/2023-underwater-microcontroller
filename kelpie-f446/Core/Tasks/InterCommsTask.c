@@ -43,30 +43,37 @@ PUBLIC void InitInternalCommsTask(void)
 PRIVATE void ICommsTransmitRoutine()
 {
 	IMUData_t imudata = DA_GetIMUQuaterion();
-	PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
+	//PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
 
-	humidity_t humidity = DA_GetHumidity();
-	temperature_t temperature = DA_GetTemperature();
-	PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
+	//humidity_t humidity = DA_GetHumidity();
+	//temperature_t temperature = DA_GetTemperature();
+	//PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
 
+	KR23_IncomingMessage im = KR23_IncomingMessage_init_zero;
+	im.has_sensorsData = true;
 
+//	im.sensorsData.accelerometer_x = 0.0;
+//	im.sensorsData.accelerometer_y = 0.0;								//Still need these
+//	im.sensorsData.accelerometer_y = 0.0;
 
-}
+	im.sensorsData.temperature = (double)DA_GetTemperature();
+	im.sensorsData.humidity = (double)DA_GetHumidity();
+//	im.sensorsData.pressure = 0.0;
+//	im.sensorsData.depth = 0.0;
 
-//Utility function that sends a command to mcu if PI_TX is shorted to PI_RX
-PRIVATE void DebugMessage(){
-	uint8_t message[] = {10, 18, 8, 128, 1, 16, 18, 32, 57, 40, 63, 48, 55, 56, 25, 64, 255, 1, 112, 6, 18, 12, 8, 45, 16, 5, 24, 43, 32, 78, 40, 2, 112, 3};
-	for(int i = 0; i < sizeof(message); i++){
-		PiComms_Send("%c", (char)message[i]);
-	}
-	osDelay(1000);
-	PiComms_Send("K.");
-	osDelay(1000);
+	im.sensorsData.quaternion_real = imudata.quat_real;
+	im.sensorsData.quaternion_i = imudata.quat_i;
+	im.sensorsData.quaternion_j = imudata.quat_j;
+	im.sensorsData.quaternion_k = imudata.quat_k;
+
+	im.sensorsData.result = KR23_KelpieResult_OK;
+
+	PiComms_Send(im);
 }
 
 PRIVATE void InternalCommsTask(void *argument)
 {
-	PiCommsMessage_t msg;
+	PiOutgoingMessage_t msg;
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "InterCommsTask Starting...");
 	InitInternalCommsModule();
@@ -89,6 +96,5 @@ PRIVATE void InternalCommsTask(void *argument)
 			}
 		}
 		ICommsTransmitRoutine();
-		//DebugMessage();			//extremely useful for debugging top-to-bottom command pipeline
 	}
 }

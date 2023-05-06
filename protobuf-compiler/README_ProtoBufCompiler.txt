@@ -1,10 +1,13 @@
 To update picomsDataTypes_KR23.pb.c/h
 first make your changes to picomsDataTypes_KR23.proto
-then cd to this directory and run "python nanopb/generator/nanopb_generator.py picomsDataTypes_KR23.proto" from command line (I used Ubuntu)
+then cd to this directory and run "python nanopb/generator/nanopb_generator.py picomsDataTypes_KR23_proto3.proto" from command line (I used Ubuntu)
 This will generate the .pb.c/h files.
 Replace the .pb.c/h and .proto files in MCU's NanoPB folder with the new ones and update the callbacks and PiCommsDriver as needed, then test the code
 
 //updating the .proto ifle in MCU is not technically necessary, but please do it so we know what is being used
+
+//(side note for topside) make cs.proto
+protoc -I=. --csharp_out=. ./picomsDataTypes_KR23_proto3.proto
 
 
 

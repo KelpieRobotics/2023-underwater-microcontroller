@@ -41,6 +41,7 @@ typedef struct SystemData_t{
 	PWMServoData_t pwmServoData[NUM_SERVOS];
 	pwm_t lightData;
 	ActuatorData_t actuatorData[NUM_HBRIDGE];
+	claw_state_t clawState;
 	IMUData_t imuData;
 	humidity_t humidity;
 	temperature_t temperature;
@@ -67,6 +68,8 @@ PUBLIC void DA_SetLightValue(pwm_t value);
 PUBLIC pwm_t DA_GetLightValue();
 PUBLIC void DA_SetPWMServoValue(uint8_t pwmServoId, pwm_t value);
 PUBLIC pwm_t DA_GetPWMServoValue(uint8_t pwmServoId);
+PUBLIC void DA_SetClawState(claw_state_t clawState);
+PUBLIC claw_state_t DA_GetClawState();
 
 PUBLIC void DA_SetAppendageState(uint8_t appendageId, GPIO_PinState value);
 PUBLIC GPIO_PinState DA_GetAppendageState(uint8_t appendageId);

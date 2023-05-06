@@ -9,6 +9,7 @@
 #include "SerialDebugDriver.h"
 #include "UserTypes.h"
 #include "..\..\..\Middlewares\Third_Party\NanoPB\pb_decode.h"
+#include "..\..\..\Middlewares\Third_Party\NanoPB\pb_encode.h"
 
 #include "stdlib.h"
 
@@ -18,6 +19,8 @@ extern UART_HandleTypeDef huart4;
 UART_HandleTypeDef* uart4Handle = &huart4;
 static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
+#define TX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
+static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 #define RX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
@@ -35,7 +38,7 @@ typedef struct PiCommsQueue_t
 	uint32_t head;
 	uint32_t tail;
 	uint32_t count;
-	PiCommsMessage_t data[QUEUE_MAX];
+	KR23_OutgoingMessage data[QUEUE_MAX];
 }PiCommsQueue_t;
 
 PiCommsQueue_t piCommsQueue;	//queue of all received messages as PiCommsMessage_t
@@ -56,14 +59,31 @@ PUBLIC void PiComms_Init(){
 	SerialDebug(TAG, "PiCommsModile Starting...");
 }
 
-PUBLIC void PiComms_Send(const char * message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	length_t len = vsprintf(messageBuf, message, args);
-	HAL_UART_Transmit(uart4Handle, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
-	va_end(args);
+//PUBLIC void PiComms_Send(const char * message, ...)
+//{
+//	va_list args;
+//	va_start(args, message);
+//	length_t len = vsprintf(messageBuf, message, args);
+//	HAL_UART_Transmit(uart4Handle, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
+//	va_end(args);
+//
+//}
 
+
+PUBLIC void PiComms_Send(PiIncomingMessage_t im)
+{
+	uint16_t message_length;
+	bool status;
+	pb_ostream_t stream = pb_ostream_from_buffer(piComms_txBuffer, sizeof(piComms_txBuffer));
+
+	status = pb_encode(&stream, KR23_IncomingMessage_fields, &im);
+	message_length = stream.bytes_written;
+	if (!status)
+	{
+		SerialDebug(TAG,"Failed to write to Buffer");
+		return ;
+	}
+	HAL_UART_Transmit(uart4Handle, (uint8_t*)messageBuf, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
 }
 
 /*

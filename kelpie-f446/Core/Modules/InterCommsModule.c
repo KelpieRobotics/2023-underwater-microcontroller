@@ -19,33 +19,48 @@
 
 const char * TAG = "ICM";
 
-PRIVATE void HandlePiCommsMessage_t(PiCommsMessage_t msg);
-PRIVATE void PrintPiCommsMessage_t(PiCommsMessage_t msg);
+PRIVATE void HandlePiCommsMessage_t(PiOutgoingMessage_t msg);
+PRIVATE void PrintPiCommsMessage_t(PiOutgoingMessage_t msg);
 
 PUBLIC void InitInternalCommsModule(){
 	PiComms_Init();
 }
 
 //calls message id's callback and passes in data
-PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
+PUBLIC result_t InternalCommsMessageCallback(PiOutgoingMessage_t msg){
 	PrintPiCommsMessage_t(msg);
 	HandlePiCommsMessage_t(msg);
 	return RESULT_OK;
 }
 
-PRIVATE void HandlePiCommsMessage_t(PiCommsMessage_t msg){
+PRIVATE void HandlePiCommsMessage_t(PiOutgoingMessage_t msg){
 	if(msg.has_attachmentCommand){
 		AAMod_Callback(msg.attachmentCommand);
 	}
 	if(msg.has_thrusterCommand){
 		MCMod_ThrusterCallback(msg.thrusterCommand);
 	}
+
+	KR23_IncomingMessage imPoll = KR23_IncomingMessage_init_zero;
+	imPoll.has_pollMessage = true;
+	SetPollMessageValues(imPoll.pollMessage);
+
+	PiComms_Send(imPoll);
 }
 
 
+//sets the poll message values
+PRIVATE void SetPollMessageValues(KR23_PollMessage pollMessage){
+	pollMessage.claw_state = DA_GetClawState();
+	pollMessage.light_PWM = DA_GetLightValue();
+	pollMessage.servo_0_PWM = DA_GetPWMServoValue(0);
+	pollMessage.thruster_0_PWM = DA_GetThrusterValue(0);
+	pollMessage.result = KR23_KelpieResult_OK;
+}
+
 
 //Helper function for  debugging. Will need to be updated when .pb.c/h files are generated just like callbacks and HandlePiCommsMessage_t
-PRIVATE void PrintPiCommsMessage_t(PiCommsMessage_t msg){
+PRIVATE void PrintPiCommsMessage_t(PiOutgoingMessage_t msg){
 	SerialPrintln("PrintPiCommsMessage_t");
 	if(msg.has_attachmentCommand){
 		SerialPrintln("attachmentCommand");

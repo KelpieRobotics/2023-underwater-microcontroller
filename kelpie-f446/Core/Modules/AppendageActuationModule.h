@@ -12,12 +12,6 @@
 #include "UserTypes.h"
 #include "stm32f4xx_hal.h"
 
-typedef enum {
-	CLAW_IDLE,
-	CLAW_CLOSE,
-	CLAW_OPEN
-} claw_state_t;
-
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state);
 PUBLIC void AAMod_SetServoValue(ServoID_t id, uint8_t input);
 PUBLIC void AAMod_SetLightValue(uint8_t input);

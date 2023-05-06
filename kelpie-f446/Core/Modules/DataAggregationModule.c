@@ -60,6 +60,13 @@ PUBLIC GPIO_PinState DA_GetAppendageState(uint8_t appendageId)
 	return SystemData.actuatorData[appendageId].state;
 }
 
+PUBLIC void DA_SetClawState(claw_state_t clawState){
+	SystemData.clawState = clawState;
+}
+PUBLIC claw_state_t DA_GetClawState(){
+	return SystemData.clawState;
+}
+
 PUBLIC void DA_SetHumidity(humidity_t hum)
 {
 	DPRINT(TAG, "Humidity write");

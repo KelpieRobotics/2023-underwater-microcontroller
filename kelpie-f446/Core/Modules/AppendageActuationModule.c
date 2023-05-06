@@ -17,6 +17,7 @@
  */
 PUBLIC void AAMod_SetAppendageValue(claw_state_t state){
 	SerialDebug(TAG, "AAMod_SetAppendageValue state: %d", state);
+	DA_SetClawState(state);
 	switch(state){
 	case CLAW_OPEN:
 		DA_SetAppendageState(CLAW_L, GPIO_PIN_RESET);
@@ -54,6 +55,4 @@ PUBLIC void AAMod_Callback(AttachmentCommand ac){
 	AAMod_SetServoValue(0, ac.servo_0_PWM);
 	AAMod_SetServoValue(1, ac.servo_1_PWM);
 	AAMod_SetServoValue(2, ac.servo_2_PWM);
-
-	PiComms_Send("#ACK:%s!", TAG);
 }

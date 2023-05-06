@@ -37,7 +37,5 @@ PUBLIC void MCMod_ThrusterCallback(ThrusterCommand tc)
 	MCMod_SetThrusterValue(5, tc.thruster_5_PWM);
 	MCMod_SetThrusterValue(6, tc.thruster_6_PWM);
 	MCMod_SetThrusterValue(7, tc.thruster_7_PWM);
-
-	PiComms_Send("#ACK:%s!", TAG);
 }
 
