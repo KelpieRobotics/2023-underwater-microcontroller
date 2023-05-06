@@ -83,7 +83,11 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 		SerialDebug(TAG,"Failed to write to Buffer");
 		return ;
 	}
-	HAL_UART_Transmit(uart4Handle, (uint8_t*)messageBuf, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
+	piComms_txBuffer[message_length] = (uint8_t)term1;		//write termination characters
+	piComms_txBuffer[message_length] = (uint8_t)term2;
+	message_length += 2;
+
+	HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
 }
 
 /*

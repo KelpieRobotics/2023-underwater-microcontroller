@@ -49,26 +49,26 @@ PRIVATE void ICommsTransmitRoutine()
 	//temperature_t temperature = DA_GetTemperature();
 	//PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
 
-	KR23_IncomingMessage im = KR23_IncomingMessage_init_zero;
-	im.has_sensorsData = true;
+	KR23_IncomingMessage imSensors = KR23_IncomingMessage_init_zero;
+	imSensors.has_sensorsData = true;
 
-//	im.sensorsData.accelerometer_x = 0.0;
-//	im.sensorsData.accelerometer_y = 0.0;								//Still need these
-//	im.sensorsData.accelerometer_y = 0.0;
+//	imSensors.sensorsData.accelerometer_x = 0;
+//	imSensors.sensorsData.accelerometer_y = 0;								//Still need these
+//	imSensors.sensorsData.accelerometer_y = 0;
 
-	im.sensorsData.temperature = (double)DA_GetTemperature();
-	im.sensorsData.humidity = (double)DA_GetHumidity();
-//	im.sensorsData.pressure = 0.0;
-//	im.sensorsData.depth = 0.0;
+	imSensors.sensorsData.temperature = (double)DA_GetTemperature();
+	imSensors.sensorsData.humidity = (double)DA_GetHumidity();
+//	imSensors.sensorsData.pressure = 0;
+//	imSensors.sensorsData.depth = 0;
 
-	im.sensorsData.quaternion_real = imudata.quat_real;
-	im.sensorsData.quaternion_i = imudata.quat_i;
-	im.sensorsData.quaternion_j = imudata.quat_j;
-	im.sensorsData.quaternion_k = imudata.quat_k;
+	imSensors.sensorsData.quaternion_real = imudata.quat_real;
+	imSensors.sensorsData.quaternion_i = imudata.quat_i;
+	imSensors.sensorsData.quaternion_j = imudata.quat_j;
+	imSensors.sensorsData.quaternion_k = imudata.quat_k;
 
-	im.sensorsData.result = KR23_KelpieResult_OK;
+	imSensors.sensorsData.result = KR23_KelpieResult_OK;
 
-	PiComms_Send(im);
+	PiComms_Send(imSensors);
 }
 
 PRIVATE void InternalCommsTask(void *argument)
