@@ -9,7 +9,7 @@
 #define BUFFER_LENGTH 124
 
 
-int main_COMMENTEDOUT() {
+int main() {
 
 	uint8_t buffer[BUFFER_LENGTH];
 	memset(buffer, '\0', BUFFER_LENGTH * sizeof(uint8_t));
@@ -17,31 +17,27 @@ int main_COMMENTEDOUT() {
 	bool status;
 	{
 		uint8_t MAX = 127;
-		KR23_OutgoingMessage msgOut = KR23_OutgoingMessage_init_zero;
+		KR23_IncomingMessage msgIn = KR23_IncomingMessage_init_zero;
 		pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-		KR23_ThrusterCommand tc = KR23_ThrusterCommand_init_zero;
-		tc.thruster_0_PWM = MAX;
-		tc.thruster_1_PWM = MAX;
-		tc.thruster_2_PWM = MAX;
-		tc.thruster_3_PWM = MAX;
-		tc.thruster_4_PWM = MAX;
-		tc.thruster_5_PWM = MAX;
-		tc.thruster_6_PWM = MAX;
-		tc.thruster_7_PWM = MAX;
-		tc.result = KR23_KelpieResult_OK;
-		msgOut.thrusterCommand = tc;
-		msgOut.has_thrusterCommand = false;
-		KR23_AttachmentCommand ac = KR23_AttachmentCommand_init_zero;
-		ac.claw_state = KR23_KelpieClawState_OPEN;
-		ac.servo_0_PWM = MAX;
-		ac.servo_1_PWM = MAX;
-		ac.servo_2_PWM = MAX;
-		ac.light_PWM = 0;
-		ac.result = KR23_KelpieResult_OK;
-		msgOut.attachmentCommand = ac;
-		msgOut.has_attachmentCommand = true;
+		KR23_PollMessage pm = KR23_PollMessage_init_zero;
+		pm.thruster_0_PWM = MAX;
+		pm.thruster_1_PWM = MAX;
+		pm.thruster_2_PWM = MAX;
+		pm.thruster_3_PWM = MAX;
+		pm.thruster_4_PWM = MAX;
+		pm.thruster_5_PWM = MAX;
+		pm.thruster_6_PWM = MAX;
+		pm.thruster_7_PWM = MAX;
+		pm.claw_state = KR23_KelpieClawState_OPEN;
+		pm.light_PWM = MAX;
+		pm.servo_0_PWM = MAX;
+		pm.servo_1_PWM = MAX;
+		pm.servo_2_PWM = MAX;
+		pm.result = KR23_KelpieResult_OK;
+		msgIn.pollMessage = pm;
+		msgIn.has_pollMessage = true;
 
-		status = pb_encode(&stream, KR23_OutgoingMessage_fields, &msgOut);
+		status = pb_encode(&stream, KR23_IncomingMessage_fields, &msgIn);
 		message_length = stream.bytes_written;
 		if (!status)
 		{
@@ -50,7 +46,7 @@ int main_COMMENTEDOUT() {
 		}
 	}
 
-	printf("Buffer:\n");
+	printf("Buffer: %ld\n", message_length);
 
 	for (u_int8_t i = 0; i < message_length - 1; i++) {
 		printf("%d ", buffer[i]);

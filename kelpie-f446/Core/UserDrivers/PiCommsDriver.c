@@ -19,9 +19,9 @@ extern UART_HandleTypeDef huart4;
 UART_HandleTypeDef* uart4Handle = &huart4;
 static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
-#define TX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
+#define TX_BUFFER_SIZE 255		//size of the largest possible tx message
 static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
-#define RX_BUFFER_SIZE 128		//number larger than the maximum number characters in the largest transmission we will receive + MESSAGE_ID_SIZE + MESSAGE_LENGTH_SIZE
+#define RX_BUFFER_SIZE 128		//size of the largest possible rx message
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
 static char term1 = 'K';	//somewhat arbitrary termination characters of message are chosen so that they are unlikely to occur sequentially in any messages
@@ -84,8 +84,10 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 		return ;
 	}
 	piComms_txBuffer[message_length] = (uint8_t)term1;		//write termination characters
-	piComms_txBuffer[message_length] = (uint8_t)term2;
+	piComms_txBuffer[message_length+1] = (uint8_t)term2;
 	message_length += 2;
+
+	//SerialDebug(TAG, "%s", piComms_txBuffer);
 
 	HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
 }
