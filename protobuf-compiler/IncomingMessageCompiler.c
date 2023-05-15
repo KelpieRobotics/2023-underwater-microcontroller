@@ -53,9 +53,9 @@ int main() {
 	}
 	printf("%d\n", buffer[message_length - 1]);
 	{
-		KR23_OutgoingMessage receivedMsg = KR23_OutgoingMessage_init_zero;
+		KR23_OutgoingMessage receivedMsg = KR23_IncomingMessage_init_zero;
 		pb_istream_t stream = pb_istream_from_buffer(buffer, message_length);
-		status = pb_decode(&stream, KR23_OutgoingMessage_fields, &receivedMsg);
+		status = pb_decode(&stream, KR23_IncomingMessage_fields, &receivedMsg);
 		if (!status)
 		{
 			printf("Decoding failed: %s\n", PB_GET_ERROR(&stream));

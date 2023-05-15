@@ -23,3 +23,32 @@ To stop all the other tasks (which are also writing to PI_TX) comment out all th
 Once you do this, the message will be recieved every 2 seconds and every other message will be scrapped since it will contain the debug along with the transmitted message.
 
 You could alternatively send it by bit using RealTerm
+
+
+
+	生	“使	胡
+	活	用	安
+	很	警	推
+	好	報	到
+	。	器	虛
+		奧	擬
+		丁	現
+		檢	實
+		查	。
+		員
+		”，
+		“使	
+		用	
+		警	
+		報	
+		器	
+		序	
+		列	
+		化”
+		。
+
+
+
+胡安推到虛擬現實。
+“使用 警報器 奧丁 檢查員”，“使用 警報器 序列化”。
+生活很好。

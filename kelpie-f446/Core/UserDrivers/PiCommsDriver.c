@@ -23,7 +23,7 @@ static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 #define RX_BUFFER_SIZE 128		//size of the largest possible rx message
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
-static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
+static uint16_t piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
 static char term1 = 'K';	//somewhat arbitrary termination characters of message are chosen so that they are unlikely to occur sequentially in any messages
 static char term2 = '.';	// this will be replaced with cobs bit stuffing so 0 is termination
 bool lastWasTerm1 = false;
@@ -51,7 +51,7 @@ PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, KR23_OutgoingMessage value
 
 
 PUBLIC void PiComms_Init(){
-	piComms_rxBuffer_index = piComms_rxBuffer;
+    memset( piComms_rxBuffer, '\0', TX_BUFFER_SIZE);
 
 	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);
 	PiCommsQueue_init(&piCommsQueue);
@@ -99,24 +99,23 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	uint8_t recievedByte = piComms_rxBuffer_index[0];
-	if(lastWasTerm1 && (recievedByte == term2)){
-		uint16_t protobufLen = piComms_rxBuffer_index - piComms_rxBuffer - 1;		//protobufLen = length the data received + 1 - 2. The 1 comes from an inclusive difference between the base and incremented pointer. The -2 comes from removing the last 2 characters "\r\n"
-		piComms_rxBuffer_index = piComms_rxBuffer;					//reset piComms_rxBuffer_index if it is not the last byte in a message
-		PiComms_handleMessage(protobufLen);						//make message
-		memset(piComms_rxBuffer, '\0', (protobufLen+2) * sizeof(uint8_t));		//reset buffer
-	} else if(piComms_rxBuffer_index - piComms_rxBuffer < RX_BUFFER_SIZE - 1) {
-		piComms_rxBuffer_index++;						//increment piComms_rxBuffer_index if it is not the last byte in a message
-	} else {
-		SerialDebug(TAG,"PI_RX Buffer capacity exceeded");
-		piComms_rxBuffer_index = piComms_rxBuffer;								//reset piComms_rxBuffer_index if it is not the last byte in a message
-		memset(piComms_rxBuffer, '\0', RX_BUFFER_SIZE * sizeof(uint8_t));		//reset buffer
-	}
+	/*if the current message is */
+    if(piComms_rxBuffer_index >= 2){
+        if(piComms_rxBuffer[piComms_rxBuffer_index-1] == term1 && piComms_rxBuffer[piComms_rxBuffer_index] == term2){
+            PiComms_handleMessage(piComms_rxBuffer_index);
+            piComms_rxBuffer_index = 0;
+            memset( piComms_rxBuffer, '\0', TX_BUFFER_SIZE);
+        }
+    }
 
-	lastWasTerm1 = (recievedByte == term1);		//set lastWasTerm1
+    piComms_rxBuffer_index++;
 
-	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);	//ready to receive next byte
-	//SerialPrintln("HAL_UART_RxCpltCallback %p - %p = %d", piComms_rxBuffer_index, piComms_rxBuffer, (piComms_rxBuffer_index - piComms_rxBuffer));		//Extremely useful for debugging rx_Buffer
+    if(piComms_rxBuffer_index >= TX_BUFFER_SIZE){
+        piComms_rxBuffer_index = 0;
+        memset( piComms_rxBuffer, '\0', TX_BUFFER_SIZE);
+    }
+
+    HAL_UART_Receive_IT(uart4Handle, &piComms_rxBuffer[piComms_rxBuffer_index], 1);    //ready to receive next byte
 }
 
 /*Allocates and assigns  */
