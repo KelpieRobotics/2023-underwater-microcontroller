@@ -23,7 +23,6 @@ static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
 #define RX_BUFFER_SIZE 128		//size of the largest possible rx message
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
-static uint16_t piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
 static char term1 = 'K';	//somewhat arbitrary termination characters of message are chosen so that they are unlikely to occur sequentially in any messages
 static char term2 = '.';	// this will be replaced with cobs bit stuffing so 0 is termination
 bool lastWasTerm1 = false;
@@ -51,9 +50,9 @@ PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, KR23_OutgoingMessage value
 
 
 PUBLIC void PiComms_Init(){
-    memset( piComms_rxBuffer, '\0', TX_BUFFER_SIZE);
 
-	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);
+	memset(piComms_rxBuffer, NULL, RX_BUFFER_SIZE);		//clear buffer
+	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, 1);		//get first length
 	PiCommsQueue_init(&piCommsQueue);
 
 	SerialDebug(TAG, "PiCommsModile Starting...");
@@ -72,9 +71,9 @@ PUBLIC void PiComms_Init(){
 
 PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 {
-	uint16_t message_length;
+	uint8_t message_length;
 	bool status;
-	pb_ostream_t stream = pb_ostream_from_buffer(piComms_txBuffer, sizeof(piComms_txBuffer));
+	pb_ostream_t stream = pb_ostream_from_buffer(&piComms_txBuffer[1], sizeof(piComms_txBuffer));		//first byte is length
 
 	status = pb_encode(&stream, KR23_IncomingMessage_fields, &im);
 	message_length = stream.bytes_written;
@@ -83,13 +82,13 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 		SerialDebug(TAG,"Failed to write to Buffer");
 		return ;
 	}
-	piComms_txBuffer[message_length] = (uint8_t)term1;		//write termination characters
-	piComms_txBuffer[message_length+1] = (uint8_t)term2;
-	message_length += 2;
+	piComms_txBuffer[0] = message_length;						//write 0th byte as length
+	piComms_txBuffer[message_length+1] = (uint8_t)term1;		//write termination characters
+	piComms_txBuffer[message_length+2] = (uint8_t)term2;
 
 	//SerialDebug(TAG, "%s", piComms_txBuffer);
-
-	HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
+	return;
+	HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length+3, HAL_MAX_DELAY);				//+3 for [0] length, [-2] term1, [-1] term2
 }
 
 /*
@@ -97,25 +96,57 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
  * We check for 'term1''term2' and consider anything that came before it to be a <protobuf message>
  * if by coincidence or error we receive 'term1''term2' and what comes before is not <protobuf message>, we discard the message, report the occurrence to topside to be logged there
  */
+int8_t len = -1;
+typedef enum {
+	GET_LENGTH,
+	GET_DATA,
+	CRAWL
+}RxState;
+RxState rxState = GET_LENGTH;
+bool lastCrawlWas0 = false;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	/*if the current message is */
-    if(piComms_rxBuffer_index >= 2){
-        if(piComms_rxBuffer[piComms_rxBuffer_index-1] == term1 && piComms_rxBuffer[piComms_rxBuffer_index] == term2){
-            PiComms_handleMessage(piComms_rxBuffer_index);
-            piComms_rxBuffer_index = 0;
-            memset( piComms_rxBuffer, '\0', TX_BUFFER_SIZE);
-        }
-    }
+	if (huart != uart4Handle) return;
 
-    piComms_rxBuffer_index++;
+	/*crawl mode*/
+	if(rxState == CRAWL){
+		if(piComms_rxBuffer[0] == 0){
+			if(lastCrawlWas0){
+				//done
+				rxState = GET_LENGTH;
+				HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, 1);
+				return;
+			}
+			lastCrawlWas0 = true;
+			HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, 1);
+			return;
+		}
+		HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, 1);			//Detected a bug where get stuck in this state, but It may have been caused by a bad test environment.
+		return;
+	}
 
-    if(piComms_rxBuffer_index >= TX_BUFFER_SIZE){
-        piComms_rxBuffer_index = 0;
-        memset( piComms_rxBuffer, '\0', TX_BUFFER_SIZE);
-    }
+	/*len should be set*/
+	if (rxState == GET_LENGTH){
+        len = *piComms_rxBuffer;
+        rxState = GET_DATA;
+        HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, len + 2);	//protobuf length + 2 for termination 00
+        return;
+	}
 
-    HAL_UART_Receive_IT(uart4Handle, &piComms_rxBuffer[piComms_rxBuffer_index], 1);    //ready to receive next byte
+	if(rxState == GET_DATA){
+		if(piComms_rxBuffer[len] == 0 && piComms_rxBuffer[len+1] == 0){		//last 2 chars are 00 means successful message
+			PiComms_handleMessage(len);
+			memset(piComms_rxBuffer, NULL, RX_BUFFER_SIZE);		//clear buffer
+			rxState = GET_LENGTH;
+			HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, 1);
+			return;
+		}
+
+		memset(piComms_rxBuffer, NULL, RX_BUFFER_SIZE);		//clear buffer
+		rxState = CRAWL;
+		HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer, 1);
+		return;
+	}
 }
 
 /*Allocates and assigns  */
