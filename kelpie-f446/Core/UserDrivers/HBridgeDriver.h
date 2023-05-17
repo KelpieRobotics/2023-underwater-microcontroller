@@ -26,7 +26,7 @@ typedef struct ServoInfo{
 } HBridgeInfo_t;
 
 
-
+PUBLIC void ResetPinMode(uint8_t state);
 
 PUBLIC void SetHBridgeValue(ServoID_t servoID, GPIO_PinState state);
 PUBLIC void HBridgeDriverInit();

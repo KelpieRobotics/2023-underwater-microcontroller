@@ -28,7 +28,7 @@ PUBLIC void InitInternalCommsModule(){
 
 //calls message id's callback and passes in data
 PUBLIC result_t InternalCommsMessageCallback(PiOutgoingMessage_t msg){
-	PrintPiCommsMessage_t(msg);
+	//PrintPiCommsMessage_t(msg);
 	HandlePiCommsMessage_t(msg);
 	return RESULT_OK;
 }

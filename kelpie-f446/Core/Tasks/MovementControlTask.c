@@ -62,7 +62,7 @@ PRIVATE void MovementControlTask(void *argument)
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;
 		while(thrusterID < NUM_THRUSTERS){
-			//SerialDebug(TAG, "PWM set thruster %d: %d", thrusterID, DA_GetThrusterValue(thrusterID));
+			SerialDebug(TAG, "PWM set thruster %d: %d", thrusterID, DA_GetThrusterValue(thrusterID));
 			SetThrusterPWM(thrusterID, DA_GetThrusterValue(thrusterID));
 			thrusterID++;
 		}

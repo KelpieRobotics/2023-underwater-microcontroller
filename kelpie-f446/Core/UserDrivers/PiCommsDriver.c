@@ -21,12 +21,20 @@ static char messageBuf[MAX_PI_COMMS_SEND_LENGTH];
 
 #define TX_BUFFER_SIZE 255		//size of the largest possible tx message
 static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
+
 #define RX_BUFFER_SIZE 128		//size of the largest possible rx message
 static uint8_t piComms_rxBuffer[RX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
-static uint8_t *piComms_rxBuffer_index;		//pointer to where in the rxBuffer the next character will go
-static char term1 = 'K';	//somewhat arbitrary termination characters of message are chosen so that they are unlikely to occur sequentially in any messages
-static char term2 = '.';	// this will be replaced with cobs bit stuffing so 0 is termination
-bool lastWasTerm1 = false;
+
+static uint8_t rxByte = 0;		//pointer to where in the rxBuffer the next character will go
+static uint8_t rxLen;
+static bool gotLen;
+
+static uint16_t rxPtrOffset;
+
+static bool msgEndMode = false;	//true if we are in message end mode
+
+static uint8_t delimiter = 0b0;
+static uint8_t delimCtr;
 
 KR23_OutgoingMessage TEST_PB_MESSAGE = KR23_OutgoingMessage_init_default;
 
@@ -51,9 +59,8 @@ PRIVATE void PiCommsQueue_enqueue(PiCommsQueue_t * q, KR23_OutgoingMessage value
 
 
 PUBLIC void PiComms_Init(){
-	piComms_rxBuffer_index = piComms_rxBuffer;
-
-	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);
+	__HAL_UART_FLUSH_DRREGISTER(uart4Handle);
+	HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
 	PiCommsQueue_init(&piCommsQueue);
 
 	SerialDebug(TAG, "PiCommsModile Starting...");
@@ -83,13 +90,20 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 		SerialDebug(TAG,"Failed to write to Buffer");
 		return ;
 	}
-	piComms_txBuffer[message_length] = (uint8_t)term1;		//write termination characters
-	piComms_txBuffer[message_length+1] = (uint8_t)term2;
+	piComms_txBuffer[message_length] = (uint8_t)delimiter;		//write termination characters
+	piComms_txBuffer[message_length+1] = (uint8_t)delimiter;
 	message_length += 2;
 
 	//SerialDebug(TAG, "%s", piComms_txBuffer);
 
-	HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
+	//HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length, HAL_MAX_DELAY);				//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
+}
+
+void clearRx()
+{
+	gotLen = false;
+	memset(piComms_rxBuffer, 0, RX_BUFFER_SIZE);
+	rxPtrOffset = 0;
 }
 
 /*
@@ -97,25 +111,112 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
  * We check for 'term1''term2' and consider anything that came before it to be a <protobuf message>
  * if by coincidence or error we receive 'term1''term2' and what comes before is not <protobuf message>, we discard the message, report the occurrence to topside to be logged there
  */
+volatile uint8_t counter = 0;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	uint8_t recievedByte = piComms_rxBuffer_index[0];
-	if(lastWasTerm1 && (recievedByte == term2)){
-		uint16_t protobufLen = piComms_rxBuffer_index - piComms_rxBuffer - 1;		//protobufLen = length the data received + 1 - 2. The 1 comes from an inclusive difference between the base and incremented pointer. The -2 comes from removing the last 2 characters "\r\n"
-		piComms_rxBuffer_index = piComms_rxBuffer;					//reset piComms_rxBuffer_index if it is not the last byte in a message
-		PiComms_handleMessage(protobufLen);						//make message
-		memset(piComms_rxBuffer, '\0', (protobufLen+2) * sizeof(uint8_t));		//reset buffer
-	} else if(piComms_rxBuffer_index - piComms_rxBuffer < RX_BUFFER_SIZE - 1) {
-		piComms_rxBuffer_index++;						//increment piComms_rxBuffer_index if it is not the last byte in a message
-	} else {
-		SerialDebug(TAG,"PI_RX Buffer capacity exceeded");
-		piComms_rxBuffer_index = piComms_rxBuffer;								//reset piComms_rxBuffer_index if it is not the last byte in a message
-		memset(piComms_rxBuffer, '\0', RX_BUFFER_SIZE * sizeof(uint8_t));		//reset buffer
+	if (huart != uart4Handle) return;
+
+	__HAL_UART_FLUSH_DRREGISTER(uart4Handle);
+
+	// message end mode: if we're not in sync with the delim'd frames, clear the current RX values and buffer and find the next delim'd frame
+
+	if (msgEndMode)
+	{
+		uint8_t tmp = 1;
+		while (delimCtr < 2)
+		{
+			HAL_UART_Receive(uart4Handle, (uint8_t*)&tmp, 1, 100);
+			if (tmp == delimiter)
+			{
+				delimCtr++;
+			}
+			else
+			{
+				delimCtr = 0;
+			}
+		}
+		clearRx();
+		msgEndMode = false;
+		HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+		counter = 0;
+		return;
 	}
 
-	lastWasTerm1 = (recievedByte == term1);		//set lastWasTerm1
+	// if we're not in message end mode, we're in regular message mode, so we move on to regular operations
 
-	HAL_UART_Receive_IT(uart4Handle, piComms_rxBuffer_index, 1);	//ready to receive next byte
+	// first check if we're outside the bounds of the rxBuffer
+	if (rxPtrOffset >= RX_BUFFER_SIZE)
+	{
+		SerialDebug(TAG, "rxPtrOffset >= RX_BUFFER_SIZE");
+		clearRx();
+		msgEndMode = true;
+		HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+		return;
+	}
+
+	// then check if we've received the length of the protobuf message
+	if (!gotLen)
+	{
+		rxLen = rxByte;
+		gotLen = true;
+		HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+		return;
+	}
+
+	// then check if the length of the protobuf message is within bounds
+	if (rxLen > RX_BUFFER_SIZE)
+	{
+		SerialDebug(TAG, "rxLen > RX_BUFFER_SIZE");
+		clearRx();
+		msgEndMode = true;
+		HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+		return;
+	}
+
+	// then while the buffer is not full, receive the protobuf message
+	if (rxPtrOffset < rxLen)
+	{
+		piComms_rxBuffer[rxPtrOffset] = rxByte;
+		// then check if the byte we just received is a delimiter
+		if (rxByte == delimiter)
+		{
+			delimCtr++;
+		}
+		else
+		{
+			delimCtr = 0;
+		}
+		// then check if we've received the delimiter twice in a row; if so, we drop the message and re-start
+		if (delimCtr == 2)
+		{
+			SerialDebug(TAG, "delimCtr == 2 in rxBuffer, dropping message");
+			clearRx();
+			HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+			return;
+		}
+		rxPtrOffset++;
+		HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+		return;
+	}
+
+	// then check if the next two bytes are the delimiter, using a blocking receive, and if so, we've received the full message
+	uint8_t tmp_1 = rxByte;
+	    uint8_t tmp_2 = 3;
+	    HAL_UART_Receive(uart4Handle, (uint8_t*)&tmp_2, 1, 100);
+	    if (tmp_1 == delimiter && tmp_2 == delimiter)
+	    {
+	        // we've received the full message, so we can handle it
+	        PiComms_handleMessage(rxLen);
+	        clearRx();
+	        HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+	        return;
+	    }
+	// if we've gotten here, we've received the full message but it's not delimited properly, so we drop the message and re-start
+	SerialDebug(TAG, "message not delimited properly, dropping message, delims = %d%d", tmp_1, tmp_2);
+	clearRx();
+	msgEndMode = true;
+	HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
+	return;
 	//SerialPrintln("HAL_UART_RxCpltCallback %p - %p = %d", piComms_rxBuffer_index, piComms_rxBuffer, (piComms_rxBuffer_index - piComms_rxBuffer));		//Extremely useful for debugging rx_Buffer
 }
 
