@@ -18,8 +18,11 @@ void RunTaskManager()
 	DataAggregatorInit();
 
 	InitAppendageActuationTask();
-	InitInternalCommsTask();
+
 	InitMovementControlTask();
 	InitNavigationTask();
 	InitSafetyTask();
+
+
+
 }

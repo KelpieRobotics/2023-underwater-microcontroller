@@ -9,7 +9,9 @@
 #include "SafetyManagerTask.h"
 #include "SerialDebugDriver.h"
 #include "LeakSensorDriver.h"
-
+#include "HBridgeDriver.h"
+#include "PWMDriver.h"
+#include "stm32f4xx_hal.h"
 #define TAG "SMT"
 
 // FreeRTOS Configuration
@@ -40,11 +42,22 @@ PRIVATE void SafetyTask(void *argument)
 	SerialDebug(TAG, "Safety Manager Task Starting...");
 
 	safetySensorsInit();
+	uint32_t commitSelfResetTimer = 0;
 
 	for(;;)
 	{
+
 		cycleTick += TIMER_SAFETY_TASK;
 		osDelayUntil(cycleTick);
+		commitSelfResetTimer++;
+		if(commitSelfResetTimer == 120)
+		{
+			SerialPrintln("========AAAAAAAAAaaaaaaaaa========");
+			PWMDriverThrustersInit();
+			vTaskDelay(50);
+			HAL_NVIC_SystemReset();
+
+		}
 		SerialDebug(TAG, "Safety loop");
 
 		updateSafetySensorRoutine();

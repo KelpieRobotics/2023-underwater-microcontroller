@@ -9,7 +9,7 @@
 #include "PWMDriver.h"
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
-
+#include "InterCommsTask.h"
 //TEMP
 #include "AppendageActuationModule.h"
 
@@ -52,6 +52,7 @@ PRIVATE void MovementControlTask(void *argument)
 	vTaskDelay(2000/ portTICK_PERIOD_MS);
 	PWMDriverThrustersInit();
 	vTaskDelay(2000/ portTICK_PERIOD_MS);
+	InitInternalCommsTask();
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
