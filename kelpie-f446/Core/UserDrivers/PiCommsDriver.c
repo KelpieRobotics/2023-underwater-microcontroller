@@ -215,6 +215,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	SerialDebug(TAG, "message not delimited properly, dropping message, delims = %d%d", tmp_1, tmp_2);
 	clearRx();
 	msgEndMode = true;
+	HAL_UART_AbortReceive(uart4Handle);
 	HAL_UART_Receive_IT(uart4Handle, &rxByte, 1);
 	return;
 	//SerialPrintln("HAL_UART_RxCpltCallback %p - %p = %d", piComms_rxBuffer_index, piComms_rxBuffer, (piComms_rxBuffer_index - piComms_rxBuffer));		//Extremely useful for debugging rx_Buffer

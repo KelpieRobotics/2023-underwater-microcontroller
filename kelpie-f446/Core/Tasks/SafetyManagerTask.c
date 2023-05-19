@@ -49,6 +49,7 @@ PRIVATE void SafetyTask(void *argument)
 
 		cycleTick += TIMER_SAFETY_TASK;
 		osDelayUntil(cycleTick);
+		/*
 		commitSelfResetTimer++;
 		if(commitSelfResetTimer == 120)
 		{
@@ -57,7 +58,7 @@ PRIVATE void SafetyTask(void *argument)
 			vTaskDelay(50);
 			HAL_NVIC_SystemReset();
 
-		}
+		}*/
 		SerialDebug(TAG, "Safety loop");
 
 		updateSafetySensorRoutine();
