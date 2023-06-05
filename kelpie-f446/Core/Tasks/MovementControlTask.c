@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef htim3;
 // FreeRTOS Configuration
 #define STACK_SIZE 128*8
 #define MOVE_CTRL_TASK_PRIORITY (osPriority_t) osPriorityRealtime2
-#define TIMER_MOVE_CTRL_TASK 100UL
+#define TIMER_MOVE_CTRL_TASK 50UL
 
 
 osThreadId_t MovementControlTaskHandle;
