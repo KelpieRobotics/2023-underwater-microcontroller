@@ -14,9 +14,15 @@
 
 void RunTaskManager()
 {
+	// Data aggregator needs to be inited before everything >:(
+	DataAggregatorInit();
+
 	InitAppendageActuationTask();
-	InitInternalCommsTask();
+
 	InitMovementControlTask();
 	InitNavigationTask();
 	InitSafetyTask();
+
+
+
 }

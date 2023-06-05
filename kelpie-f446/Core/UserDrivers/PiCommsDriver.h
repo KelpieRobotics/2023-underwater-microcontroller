@@ -28,9 +28,9 @@
  * Auto generated init by the IOC file */
 
 PUBLIC void PiComms_Init();
-PUBLIC void PiComms_Send(const char * message, ...);
+PUBLIC void PiComms_Send(PiIncomingMessage_t im);
 PUBLIC uint8_t PiComms_IsEmpty();
-PiCommsMessage_t PiComms_GetNext();
+PiOutgoingMessage_t PiComms_GetNext();
 
 
 #endif /* USERDRIVERS_PICOMMSDRIVER_H_ */

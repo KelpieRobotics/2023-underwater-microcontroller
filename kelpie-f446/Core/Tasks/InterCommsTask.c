@@ -43,18 +43,37 @@ PUBLIC void InitInternalCommsTask(void)
 PRIVATE void ICommsTransmitRoutine()
 {
 	IMUData_t imudata = DA_GetIMUQuaterion();
-	PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
+	//PiComms_Send("#QUI:%.6f#QUJ:%.6f#QUK:%.6f#QUR:%.6f\n\r", imudata.quat_i, imudata.quat_j, imudata.quat_k, imudata.quat_real);
 
-	humidity_t humidity = DA_GetHumidity();
-	temperature_t temperature = DA_GetTemperature();
-	PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
+	//humidity_t humidity = DA_GetHumidity();
+	//temperature_t temperature = DA_GetTemperature();
+	//PiComms_Send("#HUM:%.6f#TEM:%.6f\n\r", humidity, temperature);
 
+	KR23_IncomingMessage imSensors = KR23_IncomingMessage_init_zero;
+	imSensors.has_sensorsData = true;
 
+//	imSensors.sensorsData.accelerometer_x = 0;
+//	imSensors.sensorsData.accelerometer_y = 0;								//Still need these
+//	imSensors.sensorsData.accelerometer_y = 0;
 
+	imSensors.sensorsData.temperature = (double)DA_GetTemperature();
+	imSensors.sensorsData.humidity = (double)DA_GetHumidity();
+//	imSensors.sensorsData.pressure = 0;
+//	imSensors.sensorsData.depth = 0;
+
+	imSensors.sensorsData.quaternion_real = imudata.quat_real;
+	imSensors.sensorsData.quaternion_i = imudata.quat_i;
+	imSensors.sensorsData.quaternion_j = imudata.quat_j;
+	imSensors.sensorsData.quaternion_k = imudata.quat_k;
+
+	imSensors.sensorsData.result = KR23_KelpieResult_OK;
+
+	PiComms_Send(imSensors);
 }
+
 PRIVATE void InternalCommsTask(void *argument)
 {
-	PiCommsMessage_t msg;
+	PiOutgoingMessage_t msg;
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "InterCommsTask Starting...");
 	InitInternalCommsModule();
@@ -75,7 +94,6 @@ PRIVATE void InternalCommsTask(void *argument)
 			{
 				SerialDebug(TAG,"ERR: InternalCommsTask message callback failed");
 			}
-			free(msg.data);						//free msg.data that is allocated in driver
 		}
 		ICommsTransmitRoutine();
 	}

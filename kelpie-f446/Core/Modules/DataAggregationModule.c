@@ -6,6 +6,7 @@
  */
 
 #include "DataAggregationModule.h"
+#include "PWMDriver.h"
 #include "SerialDebugDriver.h"
 
 //#define ENABLE_DEBUG
@@ -19,29 +20,51 @@
 
 SystemData_t SystemData;
 
-void DataAggregatorInit()
-{
-}
-
-PUBLIC void DA_SetIMUQuaterion(float i, float j, float k, float real)
-{
-	DPRINT(TAG, "Quat write");
-	SystemData.imuData.quat_i = i;
-	SystemData.imuData.quat_j = j;
-	SystemData.imuData.quat_k = k;
-	SystemData.imuData.quat_real= real;
-}
-
-PUBLIC IMUData_t DA_GetIMUQuaterion()
-{
-	DPRINT(TAG, "Quat read");
-	return SystemData.imuData;
-}
-
 PUBLIC void DA_SetThrusterValue(uint8_t thrusterId, pwm_t value)
 {
 	//SerialPrintln("DA_SetThrusterValue: thrusterId: %d, set value: %d, passed value: %d", thrusterId, SystemData.thrusterData[thrusterId].value, value);
 	SystemData.thrusterData[thrusterId].value = value;
+}
+PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId)
+{
+	//SerialPrintln("DA_GetThrusterValue: thrusterId: %d, get value: %d", thrusterId, SystemData.thrusterData[thrusterId].value);
+	return SystemData.thrusterData[thrusterId].value;
+}
+
+PUBLIC void DA_SetLightValue(pwm_t value)
+{
+	SystemData.lightData = value;
+}
+PUBLIC pwm_t DA_GetLightValue()
+{
+	return SystemData.lightData;
+}
+
+PUBLIC void DA_SetPWMServoValue(uint8_t pwmServoId, pwm_t value)
+{
+	SystemData.pwmServoData[pwmServoId].value = value;
+}
+PUBLIC pwm_t DA_GetPWMServoValue(uint8_t pwmServoId)
+{
+	return SystemData.pwmServoData[pwmServoId].value;
+}
+
+PUBLIC void DA_SetAppendageState(uint8_t appendageId, GPIO_PinState state)
+{
+	//SerialPrintln("DA_SetAppendageState: appendageId: %d, set state: %d, passed state: %d", appendageId, SystemData.actuatorData[appendageId].state, state);
+	SystemData.actuatorData[appendageId].state = state;
+}
+PUBLIC GPIO_PinState DA_GetAppendageState(uint8_t appendageId)
+{
+	//SerialPrintln("DA_GetAppendageState: appendageId: %d, value: %d", appendageId, SystemData.actuatorData[appendageId].state);
+	return SystemData.actuatorData[appendageId].state;
+}
+
+PUBLIC void DA_SetClawState(claw_state_t clawState){
+	SystemData.clawState = clawState;
+}
+PUBLIC claw_state_t DA_GetClawState(){
+	return SystemData.clawState;
 }
 
 PUBLIC void DA_SetHumidity(humidity_t hum)
@@ -93,21 +116,26 @@ PUBLIC pressure_t DA_GetPressure()
 	return SystemData.pressure;
 }
 
-PUBLIC pwm_t DA_GetThrusterValue(uint8_t thrusterId)
+PUBLIC void DA_SetIMUQuaterion(float i, float j, float k, float real)
 {
-	//SerialPrintln("DA_GetThrusterValue: thrusterId: %d, get value: %d", thrusterId, SystemData.thrusterData[thrusterId].value);
-	return SystemData.thrusterData[thrusterId].value;
+	DPRINT(TAG, "Quat write");
+	SystemData.imuData.quat_i = i;
+	SystemData.imuData.quat_j = j;
+	SystemData.imuData.quat_k = k;
+	SystemData.imuData.quat_real= real;
 }
 
-PUBLIC void DA_SetAppendageState(uint8_t appendageId, GPIO_PinState state)
+PUBLIC IMUData_t DA_GetIMUQuaterion()
 {
-	//SerialPrintln("DA_SetAppendageState: appendageId: %d, set state: %d, passed state: %d", appendageId, SystemData.actuatorData[appendageId].state, state);
-	SystemData.actuatorData[appendageId].state = state;
+	DPRINT(TAG, "Quat read");
+	return SystemData.imuData;
 }
 
-PUBLIC GPIO_PinState DA_GetAppendageState(uint8_t appendageId)
+void DataAggregatorInit()
 {
-	//SerialPrintln("DA_GetAppendageState: appendageId: %d, value: %d", appendageId, SystemData.actuatorData[appendageId].state);
-	return SystemData.actuatorData[appendageId].state;
+	// Thruster arming value initialization
+	for (int id = 0; id < NUM_THRUSTERS; id++)
+	{
+		DA_SetThrusterValue(id, GetThrusterZeroValue(id));
+	}
 }
-

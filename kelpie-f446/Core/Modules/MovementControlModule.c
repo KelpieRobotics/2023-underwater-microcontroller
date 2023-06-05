@@ -9,38 +9,33 @@
 #include "DataAggregationModule.h"
 #include "PWMDriver.h"
 #include "UserTypes.h"
+#include <UserUtils.h>
 #include "stdlib.h"
 #include "PiCommsDriver.h"
+#include "InterCommsTask.h"
 
 #define TAG "MCM"
-
-//this works as long as the motor uses THRUSTER_SAFE_MIN_VALUE as full reverse, THRUSTER_SAFE_MAX_VALUE as full forward, and their average as stationary
-const double PWM_SCALE = (double)(THRUSTER_SAFE_MAX_VALUE - THRUSTER_SAFE_MIN_VALUE) / (255.0);
+#define HORIZONTAL_RESPONDER 0		//we send sensor data to pi when thruster values are changed
+#define VERTICAL_RESPONDER 4		//vertical and horizontal thrusters tend to act in groups
 
 /*
- * converts the input to thruster , then calls DA_SetThrusterValue
+ * converts the input to thruster pwm value, then calls DA_SetThrusterValue
  */
 PUBLIC void MCMod_SetThrusterValue(ThrusterID_t id, uint8_t input){
-	//if the id values passed in are not the same as our local values, we will add a mapping to them.
-	DA_SetThrusterValue(id, MapInputToPWM(input));
-}
-
-/*
- * Converts a uint8_t with 0 as full forward, 127 as inactive, and 255 as full reverse to a uint16_t with 1100 as full backward, 1500 as inactive, and 1900 as full forward
- */
-PRIVATE pwm_t MapInputToPWM(uint8_t input){
-	//SerialPrintln("\tMapInputToPWM: %d",THRUSTER_SAFE_MIN_VALUE + (pwm_t)(PWM_SCALE * input));
-	return THRUSTER_SAFE_MIN_VALUE + (pwm_t)(PWM_SCALE * input);
+	//SerialDebug(TAG, " Setting thruster ",id," to input ",input);
+	DA_SetThrusterValue(id, MapInputToPWM(input, GetThrusterScalePWM(id), GetThrusterMinPWM(id)));
 }
 
 //takes uint8_t* and calls MCMod_SetThrusterValue with uint8_t id, uint8_t input
-PUBLIC void MCMod_ThrusterCallback(uint8_t *data)
+PUBLIC void MCMod_ThrusterCallback(ThrusterCommand tc)
 {
-
-	uint8_t id = data[0];
-	uint8_t input = data[1];
-
-	SerialDebug(TAG,"MCMod_ThrusterCallback id: %d, input: %d",id, input);
-	MCMod_SetThrusterValue(id, input);
-	PiComms_Send("#ACK:MCM!");
+	MCMod_SetThrusterValue(0, tc.thruster_0_PWM);
+	MCMod_SetThrusterValue(1, tc.thruster_1_PWM);
+	MCMod_SetThrusterValue(2, tc.thruster_2_PWM);
+	MCMod_SetThrusterValue(3, tc.thruster_3_PWM);
+	MCMod_SetThrusterValue(4, tc.thruster_4_PWM);
+	MCMod_SetThrusterValue(5, tc.thruster_5_PWM);
+	MCMod_SetThrusterValue(6, tc.thruster_6_PWM);
+	MCMod_SetThrusterValue(7, tc.thruster_7_PWM);
 }
+

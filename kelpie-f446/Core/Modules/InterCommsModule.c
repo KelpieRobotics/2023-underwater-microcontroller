@@ -19,144 +19,70 @@
 
 const char * TAG = "ICM";
 
-struct indexMap{
-	uint8_t id, index;
-};
-
-PRIVATE int8_t binSearch(struct indexMap arr[], uint8_t l, uint8_t r, uint8_t msgId);
-PRIVATE void swap(struct indexMap *a, struct indexMap *b);
-PRIVATE int partition(struct indexMap array[], int low, int high);
-PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high);
-
-PRIVATE ICommsErr_t ParseMessageToInts(uint8_t * rawMsg, uint16_t rawMsgLen, uint8_t * intPayload); // raw messages come in ascii encoded hex, all messages are in bytes (8bits) hence each pair of chars represents a byte of data
-
-#define NUM_MESSAGES 2
-
-struct indexMap msgIndexMap[NUM_MESSAGES];
-/* NOTE: Message length is the number of characters that make up the data payload in raw ascii encoded hex
- * 		(message with payload 020E has 2 bytes of data but message len is 4 bytes)
- * +----------------------------+---------------+-------------------------------------------------------+
- * |  Message Name				|  Message len	|Payload breakdown	(after converting ascii to int)		|
- * +----------------------------+---------------+-------------------------------------------------------+
- * |MCMod_ThrusterCallback		| 4 char		| byte 0 - motor id   									|
- * |							|				| byte 1 - motor value									|
- * +----------------------------+---------------+-------------------------------------------------------+
- * |							|				|														|
- * |							|				|														|
- * +----------------------------+---------------+-------------------------------------------------------+
- */
-ICommsMsg_t msgCallbackLookup[NUM_MESSAGES] =
-{
-		//ID,	bytes,	callback				//UPDATE NUM_MESSAGES WHEN CALLBACKS ARE ADDED
-		{42, 	4, 		&MCMod_ThrusterCallback},
-		{15,	1,		&AAMod_AppendageCallback},
-};
-
-// Helper function for converting a single char (hex) into int
-PRIVATE uint8_t hex2int(char ch)
-{
-    if (ch >= '0' && ch <= '9')
-        return ch - '0';
-    if (ch >= 'A' && ch <= 'F')
-        return ch - 'A' + 10;
-    if (ch >= 'a' && ch <= 'f')
-        return ch - 'a' + 10;
-    return -1;
-}
-
-// Helper function for parsing the message data payload. converts and combines char representing nybbles into integer bytes
-PRIVATE ICommsErr_t ParseMessageToInts(uint8_t * rawMsg, uint16_t rawMsgLen, uint8_t * intPayload)
-{
-	if(rawMsgLen % 2 == 1)
-	{
-		return ICOMMS_INVALID_MSG_LEN;
-	}
-	for(int i = 0; i<rawMsgLen; i+=2)
-	{
-		intPayload[i/2] = (hex2int(rawMsg[i]) << 4) | hex2int(rawMsg[i+1]);
-		SerialDebug(TAG, "payload %d: %d", i/2, intPayload[i/2]);
-	}
-	return ICOMMS_OK;
-}
-
-//setup mapping message ids to msgCallbackLookup indexes
-PRIVATE void MakeInternalCommsMapping(){
-	for(uint8_t i = 0; i < NUM_MESSAGES; i++){
-		msgIndexMap[i].id = msgCallbackLookup[i].msgId;
-		msgIndexMap[i].index = i;
-	}
-}
-
-//binary search for message by id
-PRIVATE int8_t binSearch(struct indexMap arr[], uint8_t l, uint8_t r, uint8_t msgId)
-{
-    if (r >= l) {
-        int8_t mid = l + ((r - l)>>1);
-        if (arr[mid].id == msgId) return arr[mid].index;
-        if (arr[mid].id > msgId) return binSearch(arr, l, mid - 1, msgId);
-        return binSearch(arr, mid + 1, r, msgId);
-    }
-    return -1;
-}
+PRIVATE void HandlePiCommsMessage_t(PiOutgoingMessage_t msg);
+PRIVATE void PrintPiCommsMessage_t(PiOutgoingMessage_t msg);
 
 PUBLIC void InitInternalCommsModule(){
 	PiComms_Init();
-	MakeInternalCommsMapping();
-	SortICommsMsg(msgIndexMap, 0, NUM_MESSAGES-1);
 }
 
 //calls message id's callback and passes in data
-PUBLIC result_t InternalCommsMessageCallback(PiCommsMessage_t msg){
-	int8_t msgIndex = binSearch(msgIndexMap, 0, NUM_MESSAGES-1, msg.messageId);
-	if(msgIndex < 0){
-		SerialPrintln("#ERR: InternalComms msgId %d not found", msg.messageId);
-		return RESULT_ERR;
-	}
-	if(msgCallbackLookup[msgIndex].dataLen != msg.dataLen){
-		SerialPrintln("#ERR: InternalCommsMessageCallback message dataLen incorrect length. Given %d, Expected %d, msgIndex: %d", msg.dataLen, msgCallbackLookup[msgIndex].dataLen, msgIndex);
-		return RESULT_ERR;
-	}
-	uint8_t intPayload[128]; // ascii encoded hex converted int8
-	ICommsErr_t res = ParseMessageToInts(msg.data, msg.dataLen, intPayload); // checks for even number of chars in ascii encoded hex data payload
-
-	SerialDebug(TAG, "Parse Result: %d", res);
-	msgCallbackLookup[msgIndex].callback(intPayload);
+PUBLIC result_t InternalCommsMessageCallback(PiOutgoingMessage_t msg){
+	//PrintPiCommsMessage_t(msg);
+	HandlePiCommsMessage_t(msg);
 	return RESULT_OK;
 }
 
+PRIVATE void HandlePiCommsMessage_t(PiOutgoingMessage_t msg){
+	if(msg.has_attachmentCommand){
+		AAMod_Callback(msg.attachmentCommand);
+	}
+	if(msg.has_thrusterCommand){
+		MCMod_ThrusterCallback(msg.thrusterCommand);
+	}
 
+	KR23_IncomingMessage imPoll = KR23_IncomingMessage_init_zero;
+	imPoll.has_pollMessage = true;
+	SetPollMessageValues(imPoll.pollMessage);
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-//FOR SORTING SortICommsMsg
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-
-PRIVATE void swap(struct indexMap *a, struct indexMap *b) {
-	struct indexMap t = *a;
-  *a = *b;
-  *b = t;
+	PiComms_Send(imPoll);
 }
 
-PRIVATE int partition(struct indexMap array[], int low, int high) {
-  int pivot = array[high].id;
-  int i = (low - 1);
 
-  for (int j = low; j < high; j++) {
-    if (array[j].id <= pivot) {
-      i++;
-      swap(&array[i], &array[j]);
-    }
-  }
-  swap(&array[i + 1], &array[high]);
-  return (i + 1);
+//sets the poll message values
+PRIVATE void SetPollMessageValues(KR23_PollMessage pollMessage){
+	pollMessage.claw_state = DA_GetClawState();
+	pollMessage.light_PWM = DA_GetLightValue();
+	pollMessage.servo_0_PWM = DA_GetPWMServoValue(0);
+	pollMessage.thruster_0_PWM = DA_GetThrusterValue(0);
+	pollMessage.result = KR23_KelpieResult_OK;
 }
 
-PRIVATE void SortICommsMsg(struct indexMap array[], int low, int high) {
-  if (low < high) {
-    int pi = partition(array, low, high);
-    SortICommsMsg(array, low, pi - 1);
-    SortICommsMsg(array, pi + 1, high);
-  }
-}
 
+//Helper function for  debugging. Will need to be updated when .pb.c/h files are generated just like callbacks and HandlePiCommsMessage_t
+PRIVATE void PrintPiCommsMessage_t(PiOutgoingMessage_t msg){
+	SerialPrintln("PrintPiCommsMessage_t");
+	if(msg.has_attachmentCommand){
+		SerialPrintln("attachmentCommand");
+		SerialPrint("claw_state: %d\t", msg.attachmentCommand.claw_state);
+		SerialPrint("light_PWM: %d\t", msg.attachmentCommand.light_PWM);
+		SerialPrint("servo_0_PWM: %d\t", msg.attachmentCommand.servo_0_PWM);
+		SerialPrint("servo_1_PWM: %d\t", msg.attachmentCommand.servo_1_PWM);
+		SerialPrint("servo_2_PWM: %d\t", msg.attachmentCommand.servo_2_PWM);
+		SerialPrint("result: %d\t", msg.attachmentCommand.result);
+	}
+	SerialPrintln("");
+	if(msg.has_thrusterCommand){
+		SerialPrintln("thrusterCommand");
+		SerialPrint("thruster_0_PWM: %d\t", msg.thrusterCommand.thruster_0_PWM);
+		SerialPrint("thruster_1_PWM: %d\t", msg.thrusterCommand.thruster_1_PWM);
+		SerialPrint("thruster_2_PWM: %d\t", msg.thrusterCommand.thruster_2_PWM);
+		SerialPrintln("thruster_3_PWM: %d\t", msg.thrusterCommand.thruster_3_PWM);
+		SerialPrint("thruster_4_PWM: %d\t", msg.thrusterCommand.thruster_4_PWM);
+		SerialPrint("thruster_5_PWM: %d\t", msg.thrusterCommand.thruster_5_PWM);
+		SerialPrint("thruster_6_PWM: %d\t", msg.thrusterCommand.thruster_6_PWM);
+		SerialPrintln("thruster_7_PWM: %d\t", msg.thrusterCommand.thruster_7_PWM);
+		SerialPrint("result: %d\t", msg.thrusterCommand.result);
+	}
+	SerialPrintln("");
+}

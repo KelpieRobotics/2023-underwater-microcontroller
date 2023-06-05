@@ -9,7 +9,7 @@
 #include "PWMDriver.h"
 #include "SerialDebugDriver.h"
 #include "DataAggregationModule.h"
-
+#include "InterCommsTask.h"
 //TEMP
 #include "AppendageActuationModule.h"
 
@@ -20,7 +20,7 @@ extern TIM_HandleTypeDef htim3;
 // FreeRTOS Configuration
 #define STACK_SIZE 128*8
 #define MOVE_CTRL_TASK_PRIORITY (osPriority_t) osPriorityRealtime2
-#define TIMER_MOVE_CTRL_TASK 500UL
+#define TIMER_MOVE_CTRL_TASK 50UL
 
 
 osThreadId_t MovementControlTaskHandle;
@@ -49,53 +49,20 @@ PRIVATE void MovementControlTask(void *argument)
 	uint32_t cycleTick = osKernelGetTickCount();
 
 	SerialDebug(TAG, "Movement Control Starting...");
-	ThrusterDriverInit();
-
-	while(thrusterID < NUM_THRUSTERS){
-		DA_SetThrusterValue(thrusterID++, GetThrusterInitValue());
-	}
-  
-	/*
-	result_t restest = SetThrusterPWM(LIGHTMODULE, 1100);
-	vTaskDelay(1000/ portTICK_PERIOD_MS);
-	SetThrusterPWM(LIGHTMODULE, 1500);*/
-
-	SetLightModulePWM(1100);
-	vTaskDelay(1000/ portTICK_PERIOD_MS);
-	SetLightModulePWM(1900);
-
-	SetServoPWM(SERVO1, 1500);
-	SetServoPWM(SERVO2, 1500);
-	SetServoPWM(SERVO3, 1500);
-	vTaskDelay(5000/ portTICK_PERIOD_MS);
-
-	for(int i= 0; i<3; i++)
-	{
-		SetServoPWM(SERVO1, 500);
-		SetServoPWM(SERVO2, 500);
-		SetServoPWM(SERVO3, 500);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-		SetServoPWM(SERVO1, 2495);
-		SetServoPWM(SERVO2, 2495);
-		SetServoPWM(SERVO3, 2495);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-	}
+	vTaskDelay(2000/ portTICK_PERIOD_MS);
+	PWMDriverThrustersInit();
+	vTaskDelay(2000/ portTICK_PERIOD_MS);
+	InitInternalCommsTask();
 	for(;;)
 	{
 		cycleTick += TIMER_MOVE_CTRL_TASK;
 		osDelayUntil(cycleTick);
-		SerialDebug(TAG, "Movement Control Loop");
-
-		// TEMP
-		AAMod_SetAppendageValue(CLAW_OPEN);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-		AAMod_SetAppendageValue(CLAW_CLOSE);
-		vTaskDelay(2000/ portTICK_PERIOD_MS);
-		AAMod_SetAppendageValue(CLAW_OPEN);
+		//SerialDebug(TAG, "Movement Control Loop");
 
 		//for each thruster, check DataAggregator info and update accordingly
 		thrusterID = 0;
 		while(thrusterID < NUM_THRUSTERS){
+			SerialDebug(TAG, "PWM set thruster %d: %d", thrusterID, DA_GetThrusterValue(thrusterID));
 			SetThrusterPWM(thrusterID, DA_GetThrusterValue(thrusterID));
 			thrusterID++;
 		}
