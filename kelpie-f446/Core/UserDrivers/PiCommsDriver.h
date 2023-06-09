@@ -29,8 +29,10 @@
 
 PUBLIC void PiComms_Init();
 PUBLIC void PiComms_Send(PiIncomingMessage_t im);
-PUBLIC uint8_t PiComms_IsEmpty();
-PiOutgoingMessage_t PiComms_GetNext();
 
+PUBLIC void PiComms_ResetByteQueue();
+PUBLIC uint32_t PiComms_GetByteQueueCount();
+PUBLIC uint8_t PiComms_DequeueByte();
+void PiCommsUARTAbort();
 
 #endif /* USERDRIVERS_PICOMMSDRIVER_H_ */

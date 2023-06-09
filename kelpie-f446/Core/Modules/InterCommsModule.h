@@ -26,7 +26,6 @@ typedef enum
 }ICommsErr_t;
 
 PUBLIC void InitInternalCommsModule();
-PUBLIC result_t InternalCommsMessageCallback(PiOutgoingMessage_t msg);
-
+PUBLIC void ProcessRxTransmission();
 #endif /* MODULES_INTERCOMMSMODULE_H_ */
 

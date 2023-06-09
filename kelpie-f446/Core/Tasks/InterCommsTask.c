@@ -9,8 +9,11 @@
 #include "SerialDebugDriver.h"
 #include "PiCommsDriver.h"
 #include "UserTypes.h"
-#include "DataAggregationModule.h"
 
+// temp
+#include "DataAggregationModule.h"
+#include "MovementControlModule.h"
+#include "AppendageActuationModule.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -73,13 +76,11 @@ PRIVATE void ICommsTransmitRoutine()
 
 PRIVATE void InternalCommsTask(void *argument)
 {
-	PiOutgoingMessage_t msg;
+
 	uint32_t cycleTick = osKernelGetTickCount();
 	SerialDebug(TAG, "InterCommsTask Starting...");
 	InitInternalCommsModule();
 
-	uint8_t *data = malloc(sizeof(uint8_t));
-	*data = 8;
 
 	for(;;)
 	{
@@ -87,14 +88,12 @@ PRIVATE void InternalCommsTask(void *argument)
 		osDelayUntil(cycleTick);
 		//SerialDebug(TAG, "InterCommsTask Loop");
 
-		while(!PiComms_IsEmpty())			//for each message, call it's callback method
+		// check if anything to process
+		while(PiComms_GetByteQueueCount() > 0)
 		{
-			msg = PiComms_GetNext();
-			if(InternalCommsMessageCallback(msg) == RESULT_ERR)
-			{
-				SerialDebug(TAG,"ERR: InternalCommsTask message callback failed");
-			}
+			ProcessRxTransmission();
 		}
+
 		ICommsTransmitRoutine();
 	}
 }
