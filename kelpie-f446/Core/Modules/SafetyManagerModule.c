@@ -14,7 +14,7 @@
 #include "DataAggregationModule.h"
 #include "SerialDebugDriver.h"
 #include <UserTypes.h>
-#include "PiCommsDriver.h"
+#include "InterCommsModule.h"
 
 #define TAG "SMM"
 
@@ -38,7 +38,7 @@ PUBLIC result_t updateSafetySensorRoutine()
 		imError.sensorsData.temperature = 1;
 		imError.sensorsData.result = KR23_KelpieResult_ERROR_VALUE_ERROR;
 
-		PiComms_Send(imError);
+		IComms_Send(imError);
 		return RESULT_ERR;
 	}
 
@@ -57,7 +57,7 @@ PUBLIC void SMModLeakSensorERR(){
 	imError.safetyData.leak = 1;
 	imError.safetyData.result = KR23_KelpieResult_ERROR_VALUE_ERROR;
 
-	PiComms_Send(imError);
+	IComms_Send(imError);
 
 	SerialDebug(TAG, "LeakDetected");
 }

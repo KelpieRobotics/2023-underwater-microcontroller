@@ -9,6 +9,8 @@
 #include "SerialDebugDriver.h"
 #include "UserTypes.h"
 
+#include "..\..\..\Middlewares\Third_Party\NanoPB\pb_encode.h"
+
 #include "DataAggregationModule.h"
 #include "stdlib.h"
 
@@ -18,6 +20,9 @@ static uint8_t uartRxByte;
 
 extern UART_HandleTypeDef huart4;
 UART_HandleTypeDef* uart4Handle = &huart4;
+
+extern UART_HandleTypeDef huart2;
+UART_HandleTypeDef* uart2Handle = &huart2;
 
 #define TX_BUFFER_SIZE 255		//size of the largest possible tx message
 static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
@@ -76,10 +81,12 @@ PRIVATE uint8_t PiCommsQueue_dequeue( PiCommsQueue_t * q)
 	}
 	return 0;// garbage value, should never be returned
 }
+
 PUBLIC void PiComms_ResetByteQueue()
 {
 	PiCommsQueue_init(&piCommsQueue);
 }
+
 PUBLIC uint8_t PiComms_DequeueByte()
 {
 	return PiCommsQueue_dequeue(&piCommsQueue);
@@ -96,10 +103,10 @@ PUBLIC void PiComms_Init(){
 
 	SerialDebug(TAG, "PiCommsModile Starting...");
 }
-
+const uint8_t delimiter = 0b0;
 PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 {
-	/*
+	// TO DO all the protobuf logic needs to be moved to module
 	uint16_t message_length;
 	bool status;
 	pb_ostream_t stream = pb_ostream_from_buffer(piComms_txBuffer, sizeof(piComms_txBuffer));
@@ -117,9 +124,13 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 
 	//SerialDebug(TAG, "%s", piComms_txBuffer);
 
-	//HAL_UART_Transmit(uart4Handle, piComms_txBuffer, message_length, HAL_MAX_DELAY);
-	 *
-	 */			//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
+	if(HAL_UART_Transmit(uart2Handle, piComms_txBuffer, message_length, 50) != HAL_OK)
+	{
+		PiCommsUARTAbort();
+		PiComms_ResetByteQueue();
+	}
+
+	 			//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E
 }
 
 /*

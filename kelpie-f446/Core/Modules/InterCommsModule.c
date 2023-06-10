@@ -39,14 +39,19 @@ static uint8_t delimCtr;
 
 
 PRIVATE void SetPollMessageValues(KR23_PollMessage pollMessage);
-PRIVATE void HandlePiCommsMessage(PiOutgoingMessage_t msg);
+PRIVATE void IComms_TriggerCallbacks(PiOutgoingMessage_t msg);
 PRIVATE void PrintPiCommsMessage(PiOutgoingMessage_t msg);
-PRIVATE void PiComms_handleMessage(uint16_t protobufLen);
+PRIVATE void IComms_handleMessage(uint16_t protobufLen);
+PUBLIC void IComms_ProcessRxTransmission();
 
 PUBLIC void InitInternalCommsModule(){
 	PiComms_Init();
 }
 
+PUBLIC void IComms_Send(PiIncomingMessage_t im)
+{
+	PiComms_Send(im);
+}
 
 void clearRx()
 {
@@ -55,11 +60,17 @@ void clearRx()
 	rxPtrOffset = 0;
 }
 
-static uint8_t counter = 0;
-PUBLIC void ProcessRxTransmission()
+PUBLIC void IComms_PollRxMessage()
 {
+	while(PiComms_GetByteQueueCount() > 0)
+	{
+		IComms_ProcessRxTransmission();
+	}
+}
 
-
+static uint8_t counter = 0;
+PUBLIC void IComms_ProcessRxTransmission()
+{
     rxByte = PiComms_DequeueByte();
     // message end mode: if we're not in sync with the delim'd frames, clear the current RX values and buffer and find the next delim'd frame
 
@@ -143,7 +154,7 @@ PUBLIC void ProcessRxTransmission()
     if (tmp_1 == delimiter && tmp_2 == delimiter)
     {
         // we've received the full message, so we can handle it
-        PiComms_handleMessage(rxLen);
+        IComms_handleMessage(rxLen);
         clearRx();
         return;
     }
@@ -157,7 +168,7 @@ PUBLIC void ProcessRxTransmission()
 }
 
 /*Allocates and assigns  */
-PRIVATE void PiComms_handleMessage(uint16_t protobufLen)
+PRIVATE void IComms_handleMessage(uint16_t protobufLen)
 {
 	const pb_byte_t * pbBuffer = (pb_byte_t *)piComms_rxBuffer;
 	KR23_OutgoingMessage recievedMessage;
@@ -165,7 +176,7 @@ PRIVATE void PiComms_handleMessage(uint16_t protobufLen)
 	pb_istream_t istream = pb_istream_from_buffer(pbBuffer, protobufLen * sizeof(uint8_t));
 	bool decodeSuccessful = pb_decode(&istream, KR23_OutgoingMessage_fields, &recievedMessage);
 	if(decodeSuccessful){
-		HandlePiCommsMessage(recievedMessage);
+		IComms_TriggerCallbacks(recievedMessage);
 
 	}else{
 		SerialDebug(TAG, "Problem decoding Message");
@@ -173,7 +184,7 @@ PRIVATE void PiComms_handleMessage(uint16_t protobufLen)
 }
 
 
-PRIVATE void HandlePiCommsMessage(PiOutgoingMessage_t msg){
+PRIVATE void IComms_TriggerCallbacks(PiOutgoingMessage_t msg){
 	//PrintPiCommsMessage(msg);
 	if(msg.has_attachmentCommand){
 		AAMod_Callback(msg.attachmentCommand);
@@ -186,7 +197,7 @@ PRIVATE void HandlePiCommsMessage(PiOutgoingMessage_t msg){
 	imPoll.has_pollMessage = true;
 	SetPollMessageValues(imPoll.pollMessage);
 
-	PiComms_Send(imPoll);
+	IComms_Send(imPoll);
 }
 
 

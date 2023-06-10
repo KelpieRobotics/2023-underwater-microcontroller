@@ -7,13 +7,13 @@
 #include "InterCommsTask.h"
 #include "InterCommsModule.h"
 #include "SerialDebugDriver.h"
-#include "PiCommsDriver.h"
 #include "UserTypes.h"
 
 // temp
 #include "DataAggregationModule.h"
 #include "MovementControlModule.h"
 #include "AppendageActuationModule.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -71,7 +71,7 @@ PRIVATE void ICommsTransmitRoutine()
 
 	imSensors.sensorsData.result = KR23_KelpieResult_OK;
 
-	PiComms_Send(imSensors);
+	IComms_Send(imSensors);
 }
 
 PRIVATE void InternalCommsTask(void *argument)
@@ -89,10 +89,7 @@ PRIVATE void InternalCommsTask(void *argument)
 		//SerialDebug(TAG, "InterCommsTask Loop");
 
 		// check if anything to process
-		while(PiComms_GetByteQueueCount() > 0)
-		{
-			ProcessRxTransmission();
-		}
+		IComms_PollRxMessage();
 
 		ICommsTransmitRoutine();
 	}

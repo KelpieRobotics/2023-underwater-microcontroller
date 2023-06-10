@@ -8,7 +8,7 @@
 #include "SerialDebugDriver.h"
 
 extern UART_HandleTypeDef huart2;
-UART_HandleTypeDef* uart2Handle = &huart2;
+//UART_HandleTypeDef* uart2Handle = &huart2;
 static char messageBuf[MAX_SERIAL_PRINT_LENGTH];
 
 static uint8_t serial_rxBuffer[32]; // Max of 32 bytes of data
@@ -30,7 +30,7 @@ PRIVATE uint8_t SerialQueue_dequeue(SerialQueue_t * q);
 PRIVATE void SerialQueue_enqueue(SerialQueue_t * q, uint8_t value);
 
 PUBLIC void SerialDebugInit(){
-	HAL_UART_Receive_IT(uart2Handle, serial_rxBuffer, 1);
+	//HAL_UART_Receive_IT(uart2Handle, serial_rxBuffer, 1);
 	SerialQueue_init(&serialQueue);
 }
 
@@ -39,7 +39,7 @@ PUBLIC void SerialPrint(const char * message, ...)
 	va_list args;
 	va_start(args, message);
 	length_t len = vsprintf(messageBuf, message, args);
-	HAL_UART_Transmit(uart2Handle, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
+	//HAL_UART_Transmit(uart2Handle, (uint8_t*)messageBuf, len, HAL_MAX_DELAY);
 	va_end(args);
 
 }
@@ -51,7 +51,7 @@ PUBLIC void SerialPrintln(const char * message, ...)
 	length_t len = vsprintf(messageBuf, message, args);
 	messageBuf[len] = '\n';
 	messageBuf[len+1] = '\r';
-	HAL_UART_Transmit(uart2Handle, (uint8_t*)messageBuf, len+2, HAL_MAX_DELAY);
+	//HAL_UART_Transmit(uart2Handle, (uint8_t*)messageBuf, len+2, HAL_MAX_DELAY);
 	va_end(args);
 }
 #define TAG_LEN 3
@@ -71,7 +71,7 @@ PUBLIC void SerialDebug(const char * tag, const char * message, ...)
 	}
 	messageBuf[len+TAG_HEADER_LEN] = '\n';
 	messageBuf[len+1+TAG_HEADER_LEN] = '\r';
-	HAL_UART_Transmit(uart2Handle, (uint8_t*)messageBuf, len+TAG_HEADER_LEN+2, HAL_MAX_DELAY);
+	//HAL_UART_Transmit(uart2Handle, (uint8_t*)messageBuf, len+TAG_HEADER_LEN+2, HAL_MAX_DELAY);
 	va_end(args);
 }
 
