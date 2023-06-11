@@ -21,8 +21,8 @@ static uint8_t uartRxByte;
 extern UART_HandleTypeDef huart4;
 UART_HandleTypeDef* uart4Handle = &huart4;
 
-extern UART_HandleTypeDef huart2;
-UART_HandleTypeDef* uart2Handle = &huart2;
+extern UART_HandleTypeDef huart1;
+UART_HandleTypeDef* uart1Handle = &huart1;
 
 #define TX_BUFFER_SIZE 255		//size of the largest possible tx message
 static uint8_t piComms_txBuffer[TX_BUFFER_SIZE]; 			//pointer to buffer that holds incoming transmissions
@@ -124,10 +124,10 @@ PUBLIC void PiComms_Send(PiIncomingMessage_t im)
 
 	//SerialDebug(TAG, "%s", piComms_txBuffer);
 
-	if(HAL_UART_Transmit(uart2Handle, piComms_txBuffer, message_length, 50) != HAL_OK)
+	if(HAL_UART_Transmit(uart1Handle, piComms_txBuffer, message_length, 50) != HAL_OK)
 	{
-		PiCommsUARTAbort();
-		PiComms_ResetByteQueue();
+		//PiCommsUARTAbort();
+		//PiComms_ResetByteQueue();
 	}
 
 	 			//I remember someone (perhaps Mingy) saying HAL_MAX_DELAY may not be what we want here. I added updating this to my mcu to do list. - Eric E

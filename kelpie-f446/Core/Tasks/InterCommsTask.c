@@ -71,6 +71,7 @@ PRIVATE void ICommsTransmitRoutine()
 
 	imSensors.sensorsData.result = KR23_KelpieResult_OK;
 
+
 	IComms_Send(imSensors);
 }
 
@@ -81,7 +82,7 @@ PRIVATE void InternalCommsTask(void *argument)
 	SerialDebug(TAG, "InterCommsTask Starting...");
 	InitInternalCommsModule();
 
-
+	uint32_t transmit_counter = 0;
 	for(;;)
 	{
 		cycleTick += TIMER_INTERNAL_COMMS_TASK;
@@ -90,7 +91,11 @@ PRIVATE void InternalCommsTask(void *argument)
 
 		// check if anything to process
 		IComms_PollRxMessage();
+		transmit_counter++;
 
-		ICommsTransmitRoutine();
+			ICommsTransmitRoutine();
+			transmit_counter=0;
+
+
 	}
 }
